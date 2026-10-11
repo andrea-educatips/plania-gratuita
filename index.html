@@ -189,48 +189,26 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
 .brand-ft strong{color:var(--green)}
 .btn-nueva{display:block;width:100%;margin-top:.9rem;padding:12px;background:var(--white);color:var(--purple);border:1.5px solid var(--purple);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s}
 .btn-nueva:hover{background:var(--purple-lt)}
+.aviso-datos{font-size:11px;color:var(--text3);line-height:1.6;margin-top:.8rem;text-align:center}
+.val-box{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:1rem 1.25rem;border-top:1px solid var(--gray2)}
+.val-q{font-size:13px;font-weight:600;color:var(--text2);width:100%;text-align:center}
+.val-btn{padding:8px 14px;border:1.5px solid var(--green);border-radius:20px;background:var(--white);color:var(--green-dk);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer}
+.val-btn:hover{background:var(--green-lt)}
+.res-body{overflow-x:auto}
+.plan-tbl{border-collapse:collapse;width:100%;min-width:760px;table-layout:fixed}
+.plan-tbl td{border:1px solid #333;padding:6px 7px;font-size:12px;line-height:1.5;vertical-align:top;color:var(--text);word-wrap:break-word}
+.plan-tbl td.h{background:#d9ead3;font-weight:700;text-align:center;vertical-align:middle;font-size:11px}
+.plan-tbl p{margin:0 0 6px}
+.plan-tbl ol{margin:0 0 6px 18px;padding:0}
+.plan-tbl li{margin-bottom:3px}
+.plan-tbl a{color:var(--blue)}
+.rub-sep{height:28px}
+.plan-tbl .x{font-size:15px;font-weight:700}
+.btn-word{flex:1;padding:12px;background:var(--purple);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+.btn-word:hover{background:var(--purple-dk)}
 </style>
 </head>
 <body>
-
-<!-- MODAL MEMBRESÍA -->
-<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)cerrarModal()">
-  <div class="modal">
-    <button class="modal-close" onclick="cerrarModal()">×</button>
-    <div class="modal-title" id="modal-title">Desbloquea esta función</div>
-    <div class="modal-sub" id="modal-sub">Con la membresía PLANIA obtienes acceso completo a todas las herramientas de planificación curricular.</div>
-    <div class="planes-grid">
-      <div class="plan-card">
-        <span class="plan-badge pb-p">Mensual</span>
-        <div class="plan-name">Membresía PLANIA</div>
-        <div class="plan-price">$9,99<span>/mes</span></div>
-        <div class="plan-equiv">Cancela cuando quieras</div>
-        <div class="plan-feats">
-          <div class="pf"><span class="pf-i">✓</span>Planificaciones ilimitadas</div>
-          <div class="pf"><span class="pf-i">✓</span>Tabla CAI descargable en Word</div>
-          <div class="pf"><span class="pf-i">✓</span>Rúbrica con criterios</div>
-          <div class="pf"><span class="pf-i">✓</span>Adaptaciones NEE completas</div>
-          <div class="pf"><span class="pf-i">✓</span>ERCA y ACC</div>
-        </div>
-        <button class="btn-plan btn-plan-p" onclick="irMembresia()">Suscribirme mensual</button>
-      </div>
-      <div class="plan-card featured">
-        <span class="plan-badge pb-g">⭐ Mejor valor</span>
-        <div class="plan-name">PLANIA Anual</div>
-        <div class="plan-price">$89,99<span>/año</span></div>
-        <div class="plan-equiv">Equivale a $7,50/mes</div>
-        <div class="plan-feats">
-          <div class="pf"><span class="pf-i">✓</span>Todo lo del plan mensual</div>
-          <div class="pf"><span class="pf-i">✓</span>2 meses gratis vs mensual</div>
-          <div class="pf"><span class="pf-i">✓</span>Precio fijo garantizado</div>
-          <div class="pf"><span class="pf-i">✓</span>Sin interrupciones del año</div>
-        </div>
-        <button class="btn-plan btn-plan-g" onclick="irMembresia()">Suscribirme anual</button>
-        <div class="ahorro-badge">Ahorras $29,89 al año</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <header class="hdr">
   <a class="logo" href="#">
@@ -240,40 +218,23 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
     <span class="logo-name">PLANIA</span>
     <span class="logo-by">by Andrea Educatips</span>
   </a>
-  <div class="uso-counter">
-    <span id="uso-txt">4 usos gratuitos</span>
-    <div class="uso-dots">
-      <div class="dot empty" id="d1"></div>
-      <div class="dot empty" id="d2"></div>
-      <div class="dot empty" id="d3"></div>
-      <div class="dot empty" id="d4"></div>
-    </div>
-  </div>
 </header>
 
-<div class="banner">
-  ✦ ¿Quieres la planificación en tabla CAI descargable? <a onclick="abrirModal('tabla')">Ver membresía →</a>
-</div>
+<div class="banner">✦ Versión de prueba abierta. Todas las funciones están disponibles sin costo.</div>
 
 <div class="hero">
   <p class="hero-ey">Planificador curricular gratuito · Ecuador · IA real</p>
   <h1>Genera tu planificación<br>con inteligencia artificial</h1>
-  <p>Completa los datos y obtén una planificación ERCA o ACC con DUA integrado, generada por IA. Gratis, hasta 4 veces.</p>
+  <p>Completa los datos y obtén una planificación ERCA o ACC con DUA integrado, generada por IA y descargable en Word.</p>
   <div class="hero-tags">
     <span class="htag">IA real</span>
     <span class="htag">ERCA · ACC</span>
     <span class="htag">DUA integrado</span>
-    <span class="htag">4 usos gratis</span>
+    <span class="htag">Descarga en Word</span>
   </div>
 </div>
 
 <div class="main">
-
-<div class="limit-box" id="limit-box">
-  <h3>Has usado tus 4 planificaciones gratuitas</h3>
-  <p>Para continuar generando planificaciones ilimitadas con tabla CAI descargable en Word, únete a la membresía PLANIA.</p>
-  <button class="btn-gen" style="max-width:280px;margin:0 auto;display:block;font-size:15px" onclick="abrirModal('limite')">Ver planes de membresía →</button>
-</div>
 
 <!-- DATOS -->
 <div class="card" id="s-datos">
@@ -320,6 +281,14 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
           <option value="6|240">6 períodos — semana (240 min)</option>
         </select>
       </div>
+      <div class="field">
+        <label>Trimestre <span class="req">*</span></label>
+        <select id="trimestre"><option>Primer</option><option>Segundo</option><option>Tercer</option></select>
+      </div>
+      <div class="field">
+        <label>Área</label>
+        <input type="text" id="area" placeholder="Ej: Lengua y Literatura">
+      </div>
       <div class="field full">
         <label>Destreza con criterio de desempeño <span class="req">*</span></label>
         <textarea id="destreza" placeholder="Escribe la destreza exactamente como aparece en el currículo MINEDUC..."></textarea>
@@ -333,6 +302,24 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
         <input type="text" id="tema" placeholder="Ej: Los textos expositivos y su estructura">
         <span class="hint">El objetivo será generado automáticamente por PLANIA.</span>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ENCABEZADO OPCIONAL -->
+<div class="card" id="s-enc">
+  <div class="card-hdr"><div class="card-icon ic-b">🏫</div><div><div class="card-title">Datos del encabezado</div><div class="card-sub">Opcional. Lo que dejes vacío podrás completarlo luego en Word</div></div></div>
+  <div class="card-body">
+    <div class="fg">
+      <div class="field full"><label>Nombre de la institución</label><input type="text" id="institucion"></div>
+      <div class="field"><label>Nombre del docente</label><input type="text" id="docente"><span class="hint">Solo aparece en tu documento. No se guarda.</span></div>
+      <div class="field"><label>Período lectivo</label><input type="text" id="periodo_lectivo" placeholder="Ej: 2026 - 2027"></div>
+      <div class="field"><label># de unidad</label><input type="text" id="unidad"></div>
+      <div class="field"><label>Título de la unidad</label><input type="text" id="titulo_unidad"></div>
+      <div class="field"><label>Paralelo</label><input type="text" id="paralelo"></div>
+      <div class="field"></div>
+      <div class="field"><label>Fecha de inicio</label><input type="date" id="fecha_inicio"></div>
+      <div class="field"><label>Fecha de finalización</label><input type="date" id="fecha_fin"></div>
     </div>
   </div>
 </div>
@@ -396,32 +383,20 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
   </div>
 </div>
 
-<!-- NEE BLOQUEADO -->
+<!-- NEE -->
 <div class="card" id="s-nee">
-  <div class="card-hdr">
-    <div class="card-icon ic-lock">🔒</div>
-    <div>
-      <div class="card-title">Necesidades Educativas Específicas (NEE)</div>
-      <div class="card-sub">Disponible en membresía — ajustes razonables y adaptaciones curriculares</div>
-    </div>
-  </div>
+  <div class="card-hdr"><div class="card-icon ic-p">🧩</div><div><div class="card-title">Necesidades Educativas Específicas (NEE)</div><div class="card-sub">Opcional. No escribas nombres de estudiantes</div></div></div>
   <div class="card-body">
-    <div class="nee-lock">
-      <div class="nee-lock-overlay" onclick="abrirModal('nee')">
-        <div class="nee-lock-icon">🔒</div>
-        <div class="nee-lock-title">Función exclusiva de membresía</div>
-        <div class="nee-lock-sub">Genera adaptaciones para ajustes razonables y adaptaciones curriculares con destreza e indicador modificados</div>
-        <button class="btn-unlock">Ver planes →</button>
+    <div class="fg">
+      <div class="field full">
+        <label>Ajuste razonable: motivo</label>
+        <textarea id="nee_ajuste" placeholder="Ej: Presenta dificultad para desarrollar actividades de lectura"></textarea>
+        <span class="hint">No modifica la destreza ni el indicador. PLANIA propone ajustes sobre las actividades.</span>
       </div>
-      <div class="nee-preview">
-        <div class="nee-prev-item">
-          <div class="nee-prev-title">Ajuste razonable</div>
-          <div class="nee-prev-desc">Estrategias de apoyo por etapa sin modificar destreza ni indicador. Para TDAH, discapacidad sensorial, motora y más.</div>
-        </div>
-        <div class="nee-prev-item">
-          <div class="nee-prev-title">Adaptación curricular</div>
-          <div class="nee-prev-desc">Destreza e indicador modificados con complejidad reducida. Estrategias por etapa y evaluación adaptada.</div>
-        </div>
+      <div class="field full">
+        <label>Adaptación curricular: motivo o diagnóstico</label>
+        <textarea id="nee_adaptacion" placeholder="Ej: Diagnóstico de TEA. El informe psicopedagógico recomienda reducir el nivel de complejidad"></textarea>
+        <span class="hint">PLANIA adapta la destreza y el indicador. Las iniciales del estudiante las colocas tú en el Word.</span>
       </div>
     </div>
   </div>
@@ -441,6 +416,7 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
       </div>
     </div>
     <div class="err-msg" id="err-msg"></div>
+    <p class="aviso-datos">PLANIA registra los datos de cada planificación para mejorar la herramienta y con fines de investigación educativa: subnivel, asignatura, destreza, opciones elegidas, institución si la escribes, el motivo de los ajustes o adaptaciones y la planificación generada. No se guarda el nombre del docente ni se piden nombres de estudiantes.</p>
   </div>
 </div>
 
@@ -453,12 +429,12 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
     </div>
     <div class="res-meta" id="res-meta"></div>
     <div class="res-body" id="res-body"></div>
+    <div class="val-box" id="val-box"></div>
     <div class="action-row">
-      <button class="btn-tabla-lock" onclick="abrirModal('tabla')">🔒 Ver en formato tabla CAI</button>
-      <button class="btn-word-lock" onclick="abrirModal('word')">🔒 Descargar en Word</button>
+      <button class="btn-word" onclick="descargarWord()">⬇ Descargar en Word</button>
     </div>
     <div class="brand-ft">
-      <p>Generado por <strong>PLANIA · Andrea Educatips</strong> · andrea-educatips.com · Uso gratuito</p>
+      <p>Generado por <strong>PLANIA · Andrea Educatips</strong> · Versión de prueba</p>
     </div>
   </div>
   <button class="btn-nueva" onclick="nueva()">+ Generar otra planificación</button>
@@ -467,144 +443,166 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
 </div>
 
 <script>
-const MAX=4;
-function getUsos(){return parseInt(localStorage.getItem('plania_usos_v1')||'0');}
-function setUsos(n){localStorage.setItem('plania_usos_v1',n);}
-function actualizarDots(){
-  const u=getUsos();
-  for(let i=1;i<=4;i++) document.getElementById('d'+i).className='dot '+(i<=u?'used':'empty');
-  const r=MAX-u;
-  document.getElementById('uso-txt').textContent=r>0?`${r} uso${r!==1?'s':''} restante${r!==1?'s':''}`:'Sin usos disponibles';
-  if(u>=MAX){document.getElementById('limit-box').classList.add('show');document.getElementById('btn-gen').disabled=true;}
-}
-actualizarDots();
+const $=id=>document.getElementById(id);
+const val=id=>$(id).value.trim();
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let planId='';
+let ult=null;
+const VAL_HTML='<span class="val-q">¿Te sirve esta planificación para tu clase?</span><button class="val-btn" onclick="valorar(\'lista para usar\')">Sí, la usaría tal cual</button><button class="val-btn" onclick="valorar(\'necesita ajustes\')">Sí, con ajustes</button><button class="val-btn" onclick="valorar(\'no me sirve\')">No me sirve</button>';
+function getAnon(){try{let a=localStorage.getItem('plania_anon_v1');if(!a){a=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now()+'-'+Math.random().toString(16).slice(2);localStorage.setItem('plania_anon_v1',a);}return a;}catch(e){return '';}}
+function enviarEvento(tipo,valor){fetch('/.netlify/functions/evento',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo,valor:valor||'',plan_id:planId,anon_id:getAnon()})}).catch(()=>{});}
+function valorar(v){enviarEvento('valoracion',v);$('val-box').innerHTML='<span class="val-q">Gracias. Tu respuesta ayuda a mejorar PLANIA.</span>';}
 
 function selSeq(btn){document.querySelectorAll('.seq-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function getSeq(){const a=document.querySelector('.seq-btn.on');return a?a.dataset.seq:'ERCA';}
-document.getElementById('metod-grid').addEventListener('click',e=>{if(!e.target.classList.contains('mb'))return;document.querySelectorAll('.mb').forEach(b=>b.classList.remove('on'));e.target.classList.add('on');});
+$('metod-grid').addEventListener('click',e=>{if(!e.target.classList.contains('mb'))return;document.querySelectorAll('.mb').forEach(b=>b.classList.remove('on'));e.target.classList.add('on');});
 function getMetod(){const a=document.querySelector('.mb.on');return a?a.dataset.m:'';}
-document.getElementById('comp-grid').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;c.classList.toggle('on-p');});
-document.getElementById('ins-grid').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;c.classList.toggle('on-b');});
+$('comp-grid').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;c.classList.toggle('on-p');});
+$('ins-grid').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;c.classList.toggle('on-b');});
 function getComps(){return[...document.querySelectorAll('#comp-grid .chip.on-p')].map(e=>e.dataset.v);}
 function getIns(){return[...document.querySelectorAll('#ins-grid .chip.on-b')].map(e=>e.dataset.v);}
 
-// MODAL
-function abrirModal(tipo){
-  const titulos={tabla:'Desbloquea la tabla CAI',word:'Desbloquea la descarga en Word',nee:'Desbloquea las adaptaciones NEE',limite:'Has usado tus 4 planificaciones gratuitas'};
-  const subs={tabla:'Con la membresía PLANIA obtienes tu planificación en tabla estilo CAI, con destreza, indicador, actividades ERCA+DUA, recursos y evaluación — descargable en Word.',word:'Con la membresía PLANIA descarga tu planificación en Word con formato tabla CAI completo, listo para entregar.',nee:'Con la membresía PLANIA genera adaptaciones específicas para ajustes razonables y adaptaciones curriculares, con destreza e indicador modificados para cada estudiante.',limite:'Para continuar generando planificaciones ilimitadas con tabla CAI y descarga en Word, elige tu plan.'};
-  document.getElementById('modal-title').textContent=titulos[tipo]||'Desbloquea esta función';
-  document.getElementById('modal-sub').textContent=subs[tipo]||'';
-  document.getElementById('modal-overlay').classList.add('show');
-}
-function cerrarModal(){document.getElementById('modal-overlay').classList.remove('show');}
-function irMembresia(){cerrarModal();alert('Aquí irá el enlace a tu página de membresía en Wix.');}
-
-// PROGRESO
 async function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 function setStep(n,msg){
-  document.getElementById('prog-msg').textContent=msg;
+  $('prog-msg').textContent=msg;
   ['ps1','ps2','ps3','ps4'].forEach((id,i)=>{
-    const el=document.getElementById(id);el.classList.remove('active','done');
+    const el=$(id);el.classList.remove('active','done');
     if(i<n-1)el.classList.add('done');else if(i===n-1)el.classList.add('active');
   });
 }
 
-const ETAPAS_ERCA=[['Experiencia','Recuperación','ey-0',''],['Reflexión','Comprensión','ey-1','ref'],['Conceptualización','Análisis','ey-2','con'],['Aplicación','Utilización del conocimiento','ey-3','apl']];
-const ETAPAS_ACC=[['Anticipación','Activación de conocimientos previos','ey-0',''],['Construcción','Construcción del conocimiento','ey-1','ref'],['Consolidación','Transferencia y aplicación','ey-2','con']];
+const ETAPAS_ERCA=[['Experiencia','Recuperación'],['Reflexión','Comprensión'],['Conceptualización','Análisis'],['Aplicación','Utilización del conocimiento']];
+const ETAPAS_ACC=[['Anticipación','Activación de conocimientos previos'],['Construcción','Construcción del conocimiento'],['Consolidación','Transferencia y aplicación']];
+const COMPS=[['comunicacional','Competencias comunicacionales'],['matemática','Competencias matemáticas'],['digital','Competencias digitales'],['socioemocional','Competencias socioemocionales']];
+const INSER=[['cívica, ética e integridad','EDUCACIÓN CÍVICA, ÉTICA E INTEGRIDAD'],['educación socioemocional','EDUCACIÓN SOCIOEMOCIONAL'],['seguridad integral','EDUCACIÓN DE SEGURIDAD INTEGRAL'],['seguridad vial','EDUCACIÓN PARA LA SEGURIDAD VIAL Y LA MOVILIDAD'],['desarrollo sostenible','EDUCACIÓN PARA EL DESARROLLO SOSTENIBLE'],['educación financiera','EDUCACIÓN FINANCIERA']];
+const fechaEC=f=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(f||'');return m?`${m[3]}/${m[2]}/${m[1]}`:'';};
+
+// Construye la tabla con el formato de planificación microcurricular. Se usa en pantalla y en el Word.
+function tablaHTML(d,plan){
+  const h=(t,c)=>`<td class="h" colspan="${c}">${t}</td>`;
+  const c=(t,n)=>`<td colspan="${n}">${t}</td>`;
+  const marca=(lista,[clave,rot],n)=>`<td class="h" colspan="${n}">${rot}${lista.includes(clave)?'<br><span class="x">X</span>':''}</td>`;
+  const etapas=d.secuencia==='ACC'?ETAPAS_ACC:ETAPAS_ERCA;
+  const acts=etapas.map(([nombre,sub])=>{
+    const k=nombre.toLowerCase();
+    const k2=k.normalize('NFD').replace(/[̀-ͯ]/g,'');
+    const e=(plan.etapas&&(plan.etapas[k]||plan.etapas[k2]))||{};
+    const pasos=Array.isArray(e.pasos)&&e.pasos.length?`<ol>${e.pasos.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:`<p>${esc(e.actividad)}</p>`;
+    return `<p><b>${nombre.toUpperCase()}${e.nombre?': '+esc(e.nombre):''}</b>${e.tiempo?' ('+esc(e.tiempo)+')':''}</p>
+<p><i>Nivel de Marzano: ${esc(e.nivel_marzano||sub)}</i></p>
+${pasos}
+${e.insercion?`<p><i>Inserción curricular: ${esc(e.insercion)}</i></p>`:''}
+<p><b>DUA P1. Representación:</b> ${esc(e.representacion)}</p>
+<p><b>DUA P2. Acción y expresión:</b> ${esc(e.accion)}</p>
+<p><b>DUA P3. Compromiso:</b> ${esc(e.implicacion)}</p>`;
+  }).join('');
+  const recs=Array.isArray(plan.recursos)?plan.recursos.map(r=>`<p><b>${esc(r.nombre)}</b>${r.detalle?': '+esc(r.detalle):''}${r.busqueda?`<br><a href="https://www.google.com/search?q=${encodeURIComponent(r.busqueda)}" target="_blank" rel="noopener">Buscar material de apoyo</a>`:''}</p>`).join(''):esc(plan.recursos);
+  const aj=Array.isArray(plan.ajustes_razonables)?plan.ajustes_razonables:[];
+  const filasAj=(aj.length?aj:[{}]).map(a=>`<tr>${c('',2)}${c(esc(a.motivo),3)}${c(esc(a.actividad),3)}${c(esc(a.ajuste),4)}</tr>`).join('');
+  const ad=plan.adaptacion_curricular||{};
+  return `<table class="plan-tbl">
+<tr>${h('PLANIFICACIÓN MICROCURRICULAR '+esc(d.trimestre.toUpperCase())+' TRIMESTRE',12)}</tr>
+<tr>${h('Nombre de la institución',3)}${c(esc(d.institucion),9)}</tr>
+<tr>${h('Nombre del Docente',2)}${c(esc(d.docente),2)}${h('Área',1)}${c(esc(d.area),1)}${h('Asignatura',2)}${c(esc(d.asignatura),2)}${h('Periodo Lectivo',1)}${c(esc(d.periodo_lectivo),1)}</tr>
+<tr>${h('# de Unidad',2)}${h('Título de la Unidad',2)}${h('Grado/Curso',2)}${h('Paralelo',2)}${h('Fecha de Inicio',2)}${h('Fecha de Finalización',2)}</tr>
+<tr>${c(esc(d.unidad),2)}${c(esc(d.titulo_unidad),2)}${c(esc(d.grado),2)}${c(esc(d.paralelo),2)}${c(fechaEC(d.fecha_inicio),2)}${c(fechaEC(d.fecha_fin),2)}</tr>
+<tr>${h('COMPETENCIAS',4)}${COMPS.map(x=>marca(d.competencias,x,2)).join('')}</tr>
+<tr>${INSER.map(x=>marca(d.inserciones,x,2)).join('')}</tr>
+<tr>${h('DISEÑO UNIVERSAL PARA EL APRENDIZAJE',3)}${h('P1. MÚLTIPLES FORMAS DE REPRESENTACIÓN',3)}${h('P2. MÚLTIPLES FORMAS DE ACCIÓN Y EXPRESIÓN',3)}${h('P3. MÚLTIPLES FORMAS DE COMPROMISO',3)}</tr>
+<tr>${h('Ejes Transversales',3)}${c(esc(plan.ejes_transversales),9)}</tr>
+<tr>${h('Tema',3)}${c(esc(plan.tema||d.tema),9)}</tr>
+<tr>${h('Objetivo',3)}${c(esc(plan.objetivo),9)}</tr>
+<tr>${h('Destreza con criterio de desempeño',6)}${h('Indicador de evaluación',6)}</tr>
+<tr>${c(esc(d.destreza),6)}${c(esc(d.indicador),6)}</tr>
+<tr>${h('PLANIFICACIÓN',12)}</tr>
+<tr>${h('ORIENTACIONES METODOLÓGICAS PARA LA ENSEÑANZA Y APRENDIZAJE',6)}${h('RECURSOS',3)}${h('ORIENTACIONES PARA LA EVALUACIÓN',3)}</tr>
+<tr>${c(acts,6)}${c(recs,3)}${c(`<p><b>Técnica:</b> ${esc(plan.tecnica)}</p><p><b>Instrumento de evaluación:</b> ${esc(plan.instrumento)}</p>`,3)}</tr>
+<tr>${h('AJUSTE RAZONABLE',12)}</tr>
+<tr>${h('Estudiante',2)}${h('Motivo por el que realiza el ajuste',3)}${h('Actividad a modificar',3)}${h('Ajuste',4)}</tr>
+${filasAj}
+<tr>${h('ADAPTACIÓN CURRICULAR',12)}</tr>
+<tr>${h('Estudiante',2)}${h('Motivo',3)}${h('Destreza con criterio de desempeño adaptada',4)}${h('Indicador de logro adaptado',3)}</tr>
+<tr>${c('',2)}${c(esc(ad.motivo),3)}${c(esc(ad.destreza_adaptada),4)}${c(esc(ad.indicador_adaptado),3)}</tr>
+<tr>${h('ORIENTACIONES METODOLÓGICAS PARA LA ENSEÑANZA Y APRENDIZAJE',7)}${h('RECURSOS',2)}${h('ORIENTACIONES PARA LA EVALUACIÓN',3)}</tr>
+<tr>${c(esc(ad.orientaciones),7)}${c(esc(ad.recursos),2)}${c(esc(ad.evaluacion),3)}</tr>
+</table>`;
+}
+
+// Rúbrica en hoja aparte, lista para calificar.
+function rubricaHTML(d,plan){
+  const rub=Array.isArray(plan.rubrica)?plan.rubrica:[];
+  if(!rub.length)return '';
+  const h=(t,c)=>`<td class="h" colspan="${c}">${t}</td>`;
+  const c=(t,n)=>`<td colspan="${n}">${t}</td>`;
+  return `<table class="plan-tbl rub-tbl">
+<tr>${h('RÚBRICA DE EVALUACIÓN',12)}</tr>
+<tr>${h('Tema',2)}${c(esc(plan.tema||d.tema),3)}${h('Asignatura',2)}${c(esc(d.asignatura),2)}${h('Grado/Curso',2)}${c(esc(d.grado),1)}</tr>
+<tr>${h('Estudiante',2)}${c('',6)}${h('Fecha',2)}${c('',2)}</tr>
+<tr>${h('Indicador de evaluación',2)}${c(esc(d.indicador),10)}</tr>
+<tr>${h('Criterio',2)}${h('Domina los aprendizajes requeridos (9 a 10)',3)}${h('Alcanza los aprendizajes requeridos (7 a 8,99)',2)}${h('Próximo a alcanzar los aprendizajes requeridos (4,01 a 6,99)',2)}${h('No alcanza los aprendizajes requeridos (4 o menos)',2)}${h('Puntaje',1)}</tr>
+${rub.map(r=>`<tr>${c('<b>'+esc(r.criterio)+'</b>',2)}${c(esc(r.dar),3)}${c(esc(r.aar),2)}${c(esc(r.paar),2)}${c(esc(r.naar),2)}${c('',1)}</tr>`).join('')}
+<tr>${h('Calificación final (promedio de los criterios)',11)}${c('',1)}</tr>
+<tr>${h('Observaciones',2)}${c('<br><br>',10)}</tr>
+</table>`;
+}
 
 async function generar(){
-  if(getUsos()>=MAX){document.getElementById('limit-box').classList.add('show');return;}
-  const subnivel=document.getElementById('subnivel').value;
-  const asignatura=document.getElementById('asignatura').value;
-  const grado=document.getElementById('grado').value.trim();
-  const destreza=document.getElementById('destreza').value.trim();
-  const indicador=document.getElementById('indicador').value.trim();
-  let tema=document.getElementById('tema').value.trim();
-  const per_raw=document.getElementById('periodos').value;
-  const [periodos,minutos]=per_raw.split('|');
-  const secuencia=getSeq();
-  const metodologia=getMetod();
-  const competencias=getComps();
-  const inserciones=getIns();
-  const errEl=document.getElementById('err-msg');
+  const d={
+    subnivel:$('subnivel').value,asignatura:$('asignatura').value,grado:val('grado'),
+    destreza:val('destreza'),indicador:val('indicador'),tema:val('tema'),
+    trimestre:$('trimestre').value,institucion:val('institucion'),docente:val('docente'),area:val('area'),
+    periodo_lectivo:val('periodo_lectivo'),unidad:val('unidad'),titulo_unidad:val('titulo_unidad'),paralelo:val('paralelo'),
+    fecha_inicio:$('fecha_inicio').value,fecha_fin:$('fecha_fin').value,
+    secuencia:getSeq(),metodologia:getMetod(),competencias:getComps(),inserciones:getIns(),
+    nee_ajuste:val('nee_ajuste'),nee_adaptacion:val('nee_adaptacion')
+  };
+  const [periodos,minutos]=$('periodos').value.split('|');
+  const errEl=$('err-msg');
   errEl.classList.remove('show');
 
-  if(!subnivel||!asignatura||!grado||!destreza||!indicador){alert('Completa: subnivel, asignatura, grado, destreza e indicador.');return;}
-  if(!tema) tema=destreza.split('.')[0].trim().substring(0,55);
+  if(!d.subnivel||!d.asignatura||!d.grado||!d.destreza||!d.indicador){
+    errEl.textContent='Completa los campos obligatorios: subnivel, asignatura, grado, destreza e indicador.';
+    errEl.classList.add('show');return;
+  }
+  if(!d.tema) d.tema=d.destreza.split('.')[0].trim().substring(0,55);
 
-  const btn=document.getElementById('btn-gen');
+  const btn=$('btn-gen');
   btn.disabled=true;btn.textContent='PLANIA está generando...';
-  const pw=document.getElementById('prog-wrap');pw.classList.add('show');
+  const pw=$('prog-wrap');pw.classList.add('show');
 
   setStep(1,'Preparando los datos...');await sleep(400);
   setStep(2,'Consultando a la IA...');
 
   try{
-    const resp=await fetch('/.netlify/functions/planificar',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({subnivel,asignatura,grado,periodos:`${periodos} período${periodos>1?'s':''}`,minutos:`${minutos} minutos`,secuencia,metodologia,destreza,indicador,tema,competencias,inserciones})
-    });
+    // El nombre del docente, el paralelo y las fechas se usan solo en el documento. No se envían ni se guardan.
+    const envio=Object.assign({},d,{periodos:`${periodos} período${periodos>1?'s':''}`,minutos:`${minutos} minutos`,anon_id:getAnon()});
+    delete envio.docente;delete envio.paralelo;delete envio.fecha_inicio;delete envio.fecha_fin;
+    const resp=await fetch('/.netlify/functions/planificar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(envio)});
     const data=await resp.json();
     if(!resp.ok||data.error) throw new Error(data.error||'Error del servidor');
     const plan=data.plan;
+    planId=data.plan_id||'';
+    ult={d,plan};
+    $('val-box').innerHTML=VAL_HTML;
 
     setStep(3,'Construyendo tu planificación...');await sleep(500);
     setStep(4,'¡Lista!');await sleep(200);
 
-    const etapas=secuencia==='ACC'?ETAPAS_ACC:ETAPAS_ERCA;
-
-    const metaH=[
-      `<span class="mpill" style="background:#e8f5e8;color:#005700">${subnivel}</span>`,
-      `<span class="mpill" style="background:#f3e8fa;color:#6a0f8a">${asignatura}</span>`,
-      `<span class="mpill" style="background:#e6efff;color:#0000aa">${grado} · ${periodos} per. (${minutos} min)</span>`,
-      `<span class="mpill" style="background:#e8e7e2;color:#52524a">${secuencia}</span>`,
-      ...competencias.map(c=>`<span class="mpill" style="background:#f3e8fa;color:#6a0f8a">${c}</span>`),
-      ...inserciones.map(i=>`<span class="mpill" style="background:#e6efff;color:#0000aa">${i}</span>`)
+    $('res-meta').innerHTML=[
+      `<span class="mpill" style="background:#e8f5e8;color:#005700">${esc(d.subnivel)}</span>`,
+      `<span class="mpill" style="background:#f3e8fa;color:#6a0f8a">${esc(d.asignatura)}</span>`,
+      `<span class="mpill" style="background:#e6efff;color:#0000aa">${esc(d.grado)} · ${periodos} per. (${minutos} min)</span>`,
+      `<span class="mpill" style="background:#e8e7e2;color:#52524a">${d.secuencia}</span>`
     ].join('');
-
-    const etapasHTML=etapas.map(([nombre,sub,eyC,blkC])=>{
-      const key=nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-      const d=plan.etapas?.[key]||plan.etapas?.[nombre.toLowerCase()]||{};
-      return `<div class="etapa-blk ${blkC}">
-        <div class="etapa-ey ${eyC}">⬤ ${nombre.toUpperCase()} — ${sub}</div>
-        <div class="etapa-nom">${d.nombre||''}</div>
-        <div class="etapa-desc">${d.actividad||''}</div>
-        ${d.insercion?`<div class="ins-note">🔗 ${d.insercion}</div>`:''}
-        <div class="dua-grid">
-          <div class="dua-item d-rep"><div class="dua-lbl">🟣 Representación</div>${d.representacion||''}</div>
-          <div class="dua-item d-acc"><div class="dua-lbl">🔵 Acción y expresión</div>${d.accion||''}</div>
-          <div class="dua-item d-imp"><div class="dua-lbl">🟢 Implicación</div>${d.implicacion||''}</div>
-        </div>
-      </div>`;
-    }).join('');
-
-    const bodyH=`
-      <div class="obj-block"><div class="obj-lbl">Objetivo de aprendizaje</div>${plan.objetivo||''}</div>
-      <div class="dest-block">
-        <div class="dest-lbl">Destreza con criterio de desempeño</div>
-        <div class="dest-val">${destreza}</div>
-        <div class="dest-lbl" style="margin-top:.6rem">Indicador de logro</div>
-        <div class="ind-val">${indicador}</div>
-      </div>
-      ${etapasHTML}
-      <div class="rec-block"><div class="rec-lbl">Recursos</div><div style="font-size:13px;color:var(--text2);line-height:1.7">${plan.recursos||''}</div></div>
-      <div class="eval-block"><div class="eval-lbl">✦ Técnica e instrumento de evaluación</div><div class="eval-val"><strong>Técnica:</strong> ${plan.tecnica||''}<br><strong>Instrumento:</strong> ${plan.instrumento||''}<br><strong>Indicador:</strong> ${indicador}</div></div>`;
-
-    document.getElementById('res-tit').textContent=`PLANIA · ${plan.tema||tema}`;
-    document.getElementById('res-meta').innerHTML=metaH;
-    document.getElementById('res-body').innerHTML=bodyH;
-
-    const nuevosUsos=getUsos()+1;
-    setUsos(nuevosUsos);
-    actualizarDots();
+    $('res-tit').textContent=`PLANIA · ${plan.tema||d.tema}`;
+    const rubH=rubricaHTML(d,plan);
+    $('res-body').innerHTML=tablaHTML(d,plan)+(rubH?'<div class="rub-sep"></div>'+rubH:'');
 
     pw.classList.remove('show');
     btn.disabled=false;btn.textContent='✦ Generar planificación con PLANIA';
-    document.querySelectorAll('.main > .card, .main > .limit-box').forEach(c=>c.style.display='none');
-    document.getElementById('res-wrap').classList.add('show');
+    document.querySelectorAll('.main > .card').forEach(c=>c.style.display='none');
+    $('res-wrap').classList.add('show');
     window.scrollTo({top:0,behavior:'smooth'});
-
   }catch(err){
     pw.classList.remove('show');
     btn.disabled=false;btn.textContent='✦ Generar planificación con PLANIA';
@@ -614,21 +612,35 @@ async function generar(){
 }
 
 function nueva(){
-  if(getUsos()>=MAX){
-    document.getElementById('limit-box').style.display='block';
-    document.getElementById('res-wrap').classList.remove('show');
-    window.scrollTo({top:0,behavior:'smooth'});return;
-  }
-  document.querySelectorAll('.main > .card, .main > .limit-box').forEach(c=>c.style.display='block');
-  document.getElementById('res-wrap').classList.remove('show');
+  document.querySelectorAll('.main > .card').forEach(c=>c.style.display='block');
+  $('res-wrap').classList.remove('show');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
+function descargarWord(){
+  if(!ult)return;
+  enviarEvento('descarga_word');
+  const css='@page WordSection1{size:841.9pt 595.3pt;mso-page-orientation:landscape;margin:1.5cm}div.WordSection1{page:WordSection1}'
+    +'body{font-family:Arial,sans-serif;font-size:9pt}table{border-collapse:collapse;width:100%}'
+    +'td{border:1px solid #000;padding:4px 5px;vertical-align:top;font-family:Arial,sans-serif;font-size:9pt}'
+    +'td.h{background:#d9ead3;font-weight:bold;text-align:center;vertical-align:middle}p{margin:0 0 5pt 0}ol{margin:0 0 5pt 14pt;padding:0}.x{font-size:12pt}';
+  const doc='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Planificación</title>'
+    +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
+    +'<style>'+css+'</style></head><body><div class="WordSection1">'+tablaHTML(ult.d,ult.plan)+(rubricaHTML(ult.d,ult.plan)?'<br clear="all" style="page-break-before:always">'+rubricaHTML(ult.d,ult.plan):'')
+    +'<p style="font-size:8pt;color:#666;margin-top:8pt">Generado por PLANIA · Andrea Educatips</p></div></body></html>';
+  const blob=new Blob(['﻿',doc],{type:'application/msword'});
+  const a=document.createElement('a');
+  const nombre=(ult.plan.tema||ult.d.tema||'clase').replace(/[^\wáéíóúñÁÉÍÓÚÑ ]+/g,'').trim().slice(0,40).replace(/\s+/g,'_');
+  a.href=URL.createObjectURL(blob);a.download=`Planificacion_PLANIA_${nombre||'clase'}.doc`;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+
 function copiar(){
-  const t=document.getElementById('res-tit').innerText;
-  const m=document.getElementById('res-meta').innerText;
-  const b=document.getElementById('res-body').innerText;
-  navigator.clipboard.writeText(`${t}\n${m}\n\n${b}\n\nGenerado por PLANIA · Andrea Educatips — andrea-educatips.com`).then(()=>{
+  enviarEvento('copiado');
+  const t=$('res-tit').innerText;
+  const b=$('res-body').innerText;
+  navigator.clipboard.writeText(`${t}\n\n${b}\n\nGenerado por PLANIA · Andrea Educatips`).then(()=>{
     const btn=document.querySelector('.btn-copy');btn.textContent='✓ ¡Copiado!';
     setTimeout(()=>{btn.textContent='📋 Copiar texto';},2000);
   });
