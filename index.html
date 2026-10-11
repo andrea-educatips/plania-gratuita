@@ -214,6 +214,26 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
 .mapa-info .mi{padding:6px 10px;border-left:3px solid var(--blue);background:var(--blue-lt);border-radius:0 6px 6px 0;margin-top:6px}
 .mapa-info .mc{padding:6px 10px;border-left:3px solid var(--purple);background:var(--purple-lt);border-radius:0 6px 6px 0;margin-top:6px}
 textarea[readonly]{background:var(--gray)}
+.usr{display:none;align-items:center;gap:10px;font-size:12px;color:var(--text2);flex-wrap:wrap}
+.usr.show{display:flex}
+.usr b{color:var(--text)}
+.usr-pill{padding:3px 10px;border-radius:20px;background:var(--green-lt);color:var(--green-dk);font-weight:600}
+.usr-pill.fin{background:var(--purple-lt);color:var(--purple-dk)}
+.usr a{color:var(--purple);cursor:pointer;text-decoration:underline}
+.acceso{max-width:460px;margin:1.75rem auto;padding:0 1.25rem;display:none}
+.acceso.show{display:block}
+.acceso .field{margin-bottom:.8rem}
+.acc-check{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:.9rem}
+.acc-check input{width:auto;margin-top:3px;appearance:auto;-webkit-appearance:auto}
+.acc-msg{font-size:13px;line-height:1.6;margin-top:.7rem;display:none}
+.acc-msg.show{display:block}
+.acc-msg.err{color:#8a0000}.acc-msg.ok{color:var(--green-dk)}
+.acc-link{font-size:12px;color:var(--purple);cursor:pointer;text-decoration:underline;display:inline-block;margin-top:.7rem}
+#f-codigo{letter-spacing:8px;font-size:22px;text-align:center;font-weight:600}
+.main.oculto{display:none}
+.pay-precio{font-size:34px;font-weight:600;color:var(--green);text-align:center}
+.pay-precio span{font-size:14px;font-weight:400;color:var(--text2)}
+.pay-list{font-size:13px;color:var(--text2);line-height:1.8;margin:.8rem 0 1.1rem;padding-left:1.1rem}
 </style>
 </head>
 <body>
@@ -226,9 +246,10 @@ textarea[readonly]{background:var(--gray)}
     <span class="logo-name">PLANIA</span>
     <span class="logo-by">by Andrea Educatips</span>
   </a>
+  <div class="usr" id="usr"></div>
 </header>
 
-<div class="banner">✦ Versión de prueba abierta. Todas las funciones están disponibles sin costo.</div>
+<div class="banner" id="banner">✦ Regístrate con tu correo y genera tus primeras planificaciones sin costo.</div>
 
 <div class="hero">
   <p class="hero-ey">Planificador curricular gratuito · Ecuador · IA real</p>
@@ -242,7 +263,42 @@ textarea[readonly]{background:var(--gray)}
   </div>
 </div>
 
-<div class="main">
+<!-- INGRESO -->
+<div class="acceso" id="acceso">
+  <div class="card">
+    <div class="card-hdr"><div class="card-icon ic-g">✉️</div><div><div class="card-title">Ingresa a PLANIA</div><div class="card-sub">Te enviamos un código a tu correo. No necesitas contraseña</div></div></div>
+    <div class="card-body">
+      <div id="paso-correo">
+        <div class="field"><label>Nombre y apellido <span class="req">*</span></label><input type="text" id="f-nombre" autocomplete="name"></div>
+        <div class="field"><label>Correo electrónico <span class="req">*</span></label><input type="email" id="f-email" placeholder="tucorreo@ejemplo.com" autocomplete="email"></div>
+        <label class="acc-check"><input type="checkbox" id="f-acepta"><span>Acepto que Andrea Educatips guarde mi nombre y mi correo para administrar mi cuenta y para enviarme información de sus cursos, productos y novedades. Puedo pedir que me retiren de la lista cuando quiera.</span></label>
+        <button class="btn-gen" id="btn-codigo" onclick="pedirCodigo()">Enviarme el código</button>
+        <span class="hint" style="display:block;margin-top:.6rem">Si ya tienes cuenta, basta con tu correo.</span>
+      </div>
+      <div id="paso-codigo" style="display:none">
+        <div class="field"><label>Código de 6 dígitos que llegó a <b id="f-email-txt"></b></label><input type="text" id="f-codigo" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></div>
+        <button class="btn-gen" id="btn-entrar" onclick="verificarCodigo()">Ingresar</button>
+        <span class="acc-link" onclick="volverCorreo()">Usar otro correo o pedir un código nuevo</span>
+      </div>
+      <div class="acc-msg" id="acc-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUSCRIPCIÓN -->
+<div class="modal-overlay" id="pay-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="cerrarPago()">×</button>
+    <div class="modal-title">Ya usaste tus planificaciones gratuitas</div>
+    <p class="modal-sub">Con la suscripción mensual sigues generando planificaciones completas, con la destreza, el indicador y las inserciones del currículo priorizado.</p>
+    <div class="pay-precio">$<span id="pay-valor" style="font-size:34px;font-weight:600;color:var(--green)">10</span> <span>al mes</span></div>
+    <ul class="pay-list"><li>Planificaciones sin límite durante el mes</li><li>Descarga en Word y rúbrica de evaluación</li><li>Pago con tarjeta de crédito o débito a través de PayPal</li><li>Cancelas cuando quieras desde tu cuenta de PayPal</li></ul>
+    <div id="paypal-btn"></div>
+    <div class="acc-msg" id="pay-msg"></div>
+  </div>
+</div>
+
+<div class="main oculto" id="main">
 
 <!-- DATOS -->
 <div class="card" id="s-datos">
@@ -442,7 +498,7 @@ textarea[readonly]{background:var(--gray)}
       </div>
     </div>
     <div class="err-msg" id="err-msg"></div>
-    <p class="aviso-datos">PLANIA registra los datos de cada planificación para mejorar la herramienta y con fines de investigación educativa: subnivel, asignatura, destreza, opciones elegidas, institución si la escribes, el motivo de los ajustes o adaptaciones y la planificación generada. No se guarda el nombre del docente ni se piden nombres de estudiantes.</p>
+    <p class="aviso-datos">PLANIA registra los datos de cada planificación para mejorar la herramienta y con fines de investigación educativa: subnivel, asignatura, destreza, opciones elegidas, institución si la escribes, el motivo de los ajustes o adaptaciones y la planificación generada. El nombre del docente que escribes en el encabezado no se guarda y no se piden nombres de estudiantes. El nombre y el correo de tu cuenta se guardan aparte, para administrar tu acceso y enviarte información de Andrea Educatips.</p>
   </div>
 </div>
 
@@ -460,7 +516,7 @@ textarea[readonly]{background:var(--gray)}
       <button class="btn-word" onclick="descargarWord()">⬇ Descargar en Word</button>
     </div>
     <div class="brand-ft">
-      <p>Generado por <strong>PLANIA · Andrea Educatips</strong> · Versión de prueba</p>
+      <p>Generado por <strong>PLANIA · Andrea Educatips</strong></p>
     </div>
   </div>
   <button class="btn-nueva" onclick="nueva()">+ Generar otra planificación</button>
@@ -474,6 +530,85 @@ const val=id=>$(id).value.trim();
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let planId='';
 let ult=null;
+// ---------- CUENTA ----------
+let USR=null;
+const tk=()=>{try{return localStorage.getItem('plania_token')||'';}catch(e){return '';}};
+const setTk=t=>{try{t?localStorage.setItem('plania_token',t):localStorage.removeItem('plania_token');}catch(e){}};
+async function cuentaApi(datos){
+  const r=await fetch('/.netlify/functions/cuenta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw Object.assign(new Error(j.error||'No se pudo completar la acción.'),{status:r.status});
+  return j;
+}
+function accMsg(t,clase,id){const e=$(id||'acc-msg');e.textContent=t||'';e.className='acc-msg'+(t?' show '+(clase||'err'):'');}
+function pintarUsuario(){
+  const u=USR,box=$('usr');
+  if(!u){box.classList.remove('show');$('acceso').classList.add('show');$('main').classList.add('oculto');return;}
+  $('acceso').classList.remove('show');$('main').classList.remove('oculto');
+  let estado;
+  if(u.suscripcion_activa) estado=`<span class="usr-pill">Suscripción activa hasta ${new Date(u.vence).toLocaleDateString('es-EC')}</span>`;
+  else if(u.cobro_activo){const q=Math.max(0,u.limite-u.usos);estado=`<span class="usr-pill${q?'':' fin'}">${q?`Te quedan ${q} de ${u.limite} planificaciones gratuitas`:'Planificaciones gratuitas agotadas'}</span>${q?'':' <a onclick="abrirPago()">Suscribirme</a>'}`;}
+  else estado=`<span class="usr-pill">Acceso de prueba sin costo</span>`;
+  box.innerHTML=`<span><b>${esc(u.nombre||u.email)}</b></span>${estado}<a onclick="salir()">Salir</a>`;
+  box.classList.add('show');
+  $('pay-valor').textContent=u.precio;
+}
+async function iniciarSesion(){
+  if(!tk()){pintarUsuario();return;}
+  try{const j=await cuentaApi({accion:'estado',token:tk()});USR=j.usuario;}catch(e){if(e.status===401)setTk('');USR=null;}
+  pintarUsuario();
+}
+async function pedirCodigo(){
+  const email=val('f-email').toLowerCase(),nombre=val('f-nombre'),acepta=$('f-acepta').checked;
+  if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)){accMsg('Escribe un correo electrónico válido.');return;}
+  const b=$('btn-codigo');b.disabled=true;b.textContent='Enviando...';accMsg('');
+  try{
+    await cuentaApi({accion:'solicitar',email,nombre,acepta});
+    $('f-email-txt').textContent=email;$('paso-correo').style.display='none';$('paso-codigo').style.display='block';$('f-codigo').value='';$('f-codigo').focus();
+    accMsg('Código enviado. Si no lo ves en un par de minutos, revisa la carpeta de spam o promociones.','ok');
+  }catch(e){accMsg(e.message);}
+  b.disabled=false;b.textContent='Enviarme el código';
+}
+async function verificarCodigo(){
+  const b=$('btn-entrar');b.disabled=true;accMsg('');
+  try{
+    const j=await cuentaApi({accion:'verificar',email:val('f-email').toLowerCase(),codigo:val('f-codigo')});
+    setTk(j.token);USR=j.usuario;volverCorreo();pintarUsuario();window.scrollTo({top:0});
+  }catch(e){accMsg(e.message);}
+  b.disabled=false;
+}
+function volverCorreo(){$('paso-codigo').style.display='none';$('paso-correo').style.display='block';accMsg('');}
+function salir(){const t=tk();setTk('');USR=null;pintarUsuario();if(t)cuentaApi({accion:'salir',token:t}).catch(()=>{});}
+$('f-codigo').addEventListener('keydown',e=>{if(e.key==='Enter')verificarCodigo();});
+$('f-email').addEventListener('keydown',e=>{if(e.key==='Enter')pedirCodigo();});
+let paypalCargado=false;
+function cerrarPago(){$('pay-modal').classList.remove('show');}
+function abrirPago(){
+  if(!USR||!USR.paypal)return;
+  $('pay-modal').classList.add('show');accMsg('','', 'pay-msg');
+  if(paypalCargado)return;
+  paypalCargado=true;
+  const sc=document.createElement('script');
+  sc.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(USR.paypal.client_id)+'&vault=true&intent=subscription&locale=es_EC';
+  sc.onload=()=>{
+    paypal.Buttons({
+      style:{shape:'rect',color:'gold',layout:'vertical',label:'subscribe'},
+      createSubscription:(data,actions)=>actions.subscription.create({plan_id:USR.paypal.plan_id,custom_id:USR.email.slice(0,120)}),
+      onApprove:async(data)=>{
+        accMsg('Confirmando tu pago con PayPal...','ok','pay-msg');
+        for(let i=0;i<6;i++){
+          try{const j=await cuentaApi({accion:'suscribir',token:tk(),subscription_id:data.subscriptionID});USR=j.usuario;pintarUsuario();cerrarPago();return;}
+          catch(e){if(i===5){accMsg(e.message+' Tu pago quedó registrado en PayPal con el código '+data.subscriptionID+'. Escríbenos si tu cuenta no se habilita.','err','pay-msg');return;}await new Promise(r=>setTimeout(r,5000));}
+        }
+      },
+      onError:()=>accMsg('PayPal no pudo procesar el pago. Intenta de nuevo.','err','pay-msg')
+    }).render('#paypal-btn');
+  };
+  sc.onerror=()=>{paypalCargado=false;accMsg('No se pudo cargar PayPal. Revisa tu conexión.','err','pay-msg');};
+  document.head.appendChild(sc);
+}
+iniciarSesion();
+
 const VAL_HTML='<span class="val-q">¿Te sirve esta planificación para tu clase?</span><button class="val-btn" onclick="valorar(\'lista para usar\')">Sí, la usaría tal cual</button><button class="val-btn" onclick="valorar(\'necesita ajustes\')">Sí, con ajustes</button><button class="val-btn" onclick="valorar(\'no me sirve\')">No me sirve</button>';
 function getAnon(){try{let a=localStorage.getItem('plania_anon_v1');if(!a){a=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now()+'-'+Math.random().toString(16).slice(2);localStorage.setItem('plania_anon_v1',a);}return a;}catch(e){return '';}}
 function enviarEvento(tipo,valor){fetch('/.netlify/functions/evento',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo,valor:valor||'',plan_id:planId,anon_id:getAnon()})}).catch(()=>{});}
@@ -676,11 +811,14 @@ async function generar(){
 
   try{
     // El nombre del docente, el paralelo y las fechas se usan solo en el documento. No se envían ni se guardan.
-    const envio=Object.assign({},d,{periodos:`${periodos} período${periodos>1?'s':''}`,minutos:`${minutos} minutos`,anon_id:getAnon()});
+    const envio=Object.assign({},d,{periodos:`${periodos} período${periodos>1?'s':''}`,minutos:`${minutos} minutos`,anon_id:getAnon(),token:tk()});
     delete envio.docente;delete envio.paralelo;delete envio.fecha_inicio;delete envio.fecha_fin;
     const resp=await fetch('/.netlify/functions/planificar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(envio)});
     const data=await resp.json();
+    if(resp.status===401){setTk('');USR=null;pintarUsuario();throw new Error(data.error);}
+    if(resp.status===402){USR=data.usuario||USR;pintarUsuario();abrirPago();throw new Error('Ya usaste tus planificaciones gratuitas. Suscríbete para seguir generando.');}
     if(!resp.ok||data.error) throw new Error(data.error||'Error del servidor');
+    if(data.usuario){USR=data.usuario;pintarUsuario();}
     const plan=data.plan;
     planId=data.plan_id||'';
     ult={d,plan};
