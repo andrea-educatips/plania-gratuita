@@ -1,5 +1,12 @@
 const crypto = require("crypto");
-const cuenta = require("./cuenta.js");
+
+// Consulta la función de cuentas: revisa el cupo antes de generar y lo descuenta después.
+async function cuenta(accion, token) {
+  const base = process.env.URL || "https://plania.andreaeducatips.com";
+  const r = await fetch(base + "/.netlify/functions/acceso", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accion, token }) });
+  const j = await r.json().catch(() => ({}));
+  return { status: r.status, usuario: j.usuario || null };
+}
 
 // Envía una fila al registro de investigación. Si falla, la planificación se entrega igual.
 async function registrar(fila) {
@@ -38,12 +45,11 @@ exports.handler = async (event) => {
   try {
     const b = JSON.parse(event.body || "{}");
     // Solo las cuentas registradas generan planificaciones. El cupo gratuito y la suscripción se revisan aquí.
-    const store = cuenta.abrir(event);
-    let usuario = await cuenta.usuarioDeToken(store, b.token);
-    if (!usuario) return { statusCode: 401, headers, body: JSON.stringify({ error: "Ingresa con tu correo para generar planificaciones.", codigo: "sesion" }) };
-    const acc = await cuenta.acceso(store, usuario);
-    usuario = acc.u;
-    if (!acc.ok) return { statusCode: 402, headers, body: JSON.stringify({ error: "Ya usaste tus planificaciones gratuitas.", codigo: "limite", usuario: cuenta.publico(usuario) }) };
+    const token = txt(b.token, 80);
+    const aut = await cuenta("autorizar", token);
+    if (aut.status === 401) return { statusCode: 401, headers, body: JSON.stringify({ error: "Ingresa con tu correo para generar planificaciones.", codigo: "sesion" }) };
+    if (aut.status === 402) return { statusCode: 402, headers, body: JSON.stringify({ error: "Ya usaste tus planificaciones gratuitas.", codigo: "limite", usuario: aut.usuario }) };
+    if (aut.status !== 200) return { statusCode: 503, headers, body: JSON.stringify({ error: "No pudimos verificar tu cuenta. Intenta de nuevo en un momento." }) };
     const subnivel = txt(b.subnivel, 80), asignatura = txt(b.asignatura, 80), grado = txt(b.grado, 60);
     const periodos = txt(b.periodos, 30), minutos = txt(b.minutos, 30);
     const secuencia = b.secuencia === "ACC" ? "ACC" : "ERCA";
@@ -236,10 +242,8 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
       plan_json: JSON.stringify(plan),
     });
 
-    usuario.usos = (usuario.usos || 0) + 1;
-    usuario.ultimo_uso = new Date().toISOString();
-    await store.setJSON("u/" + usuario.email, usuario);
-    return { statusCode: 200, headers, body: JSON.stringify({ plan, plan_id, usuario: cuenta.publico(usuario) }) };
+    const uso = await cuenta("consumir", token).catch(() => ({ usuario: null }));
+    return { statusCode: 200, headers, body: JSON.stringify({ plan, plan_id, usuario: uso.usuario || aut.usuario }) };
 
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message || "Error interno." }) };
