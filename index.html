@@ -206,6 +206,14 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
 .plan-tbl .x{font-size:15px;font-weight:700}
 .btn-word{flex:1;padding:12px;background:var(--purple);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
 .btn-word:hover{background:var(--purple-dk)}
+.mapa-box{background:var(--green-lt);border:1.5px solid var(--green-md);border-radius:var(--radius-sm);padding:.9rem;display:none;flex-direction:column;gap:7px}
+.mapa-box.show{display:flex}
+.mapa-box select{min-height:44px}
+.mapa-info{font-size:13px;line-height:1.65;color:var(--text2)}
+.mapa-info b{color:var(--text)}
+.mapa-info .mi{padding:6px 10px;border-left:3px solid var(--blue);background:var(--blue-lt);border-radius:0 6px 6px 0;margin-top:6px}
+.mapa-info .mc{padding:6px 10px;border-left:3px solid var(--purple);background:var(--purple-lt);border-radius:0 6px 6px 0;margin-top:6px}
+textarea[readonly]{background:var(--gray)}
 </style>
 </head>
 <body>
@@ -225,7 +233,7 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
 <div class="hero">
   <p class="hero-ey">Planificador curricular gratuito · Ecuador · IA real</p>
   <h1>Genera tu planificación<br>con inteligencia artificial</h1>
-  <p>Completa los datos y obtén una planificación ERCA o ACC con DUA integrado, generada por IA y descargable en Word.</p>
+  <p>Completa los datos y obtén una planificación ERCA o ACC con DUA integrado, generada por IA y descargable en Word. En Básica Elemental, Media y Superior eliges la destreza del currículo priorizado y PLANIA coloca su indicador, sus competencias y sus inserciones curriculares.</p>
   <div class="hero-tags">
     <span class="htag">IA real</span>
     <span class="htag">ERCA · ACC</span>
@@ -289,6 +297,12 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
         <label>Área</label>
         <input type="text" id="area" placeholder="Ej: Lengua y Literatura">
       </div>
+      <div class="field full mapa-box" id="mapa-box">
+        <label>Busca la destreza en el currículo priorizado</label>
+        <input type="text" id="buscar" placeholder="Escribe un tema, una palabra o el código. Ej: fracciones, cuento, M.3.1.38" autocomplete="off">
+        <select id="sel-destreza"><option value="">Selecciona la destreza</option></select>
+        <span class="hint" id="mapa-cuenta"></span>
+      </div>
       <div class="field full">
         <label>Destreza con criterio de desempeño <span class="req">*</span></label>
         <textarea id="destreza" placeholder="Escribe la destreza exactamente como aparece en el currículo MINEDUC..."></textarea>
@@ -300,7 +314,8 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
       </div>
       <div class="field full">
         <label>Indicador de logro <span class="req">*</span></label>
-        <input type="text" id="indicador" placeholder="Ej: Identifica la idea principal de un texto expositivo">
+        <textarea id="indicador" placeholder="Ej: Identifica la idea principal de un texto expositivo"></textarea>
+        <span class="hint" id="ind-hint"></span>
       </div>
       <div class="field full">
         <label>Tema de la clase</label>
@@ -358,6 +373,12 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
       <button class="mb" data-m="Aprendizaje Basado en el Servicio">🌐 Servicio</button>
     </div>
   </div>
+</div>
+
+<!-- LO QUE MARCA EL CURRÍCULO -->
+<div class="card" id="s-mapa" style="display:none">
+  <div class="card-hdr"><div class="card-icon ic-b">🔗</div><div><div class="card-title">Competencias e inserciones de esta destreza</div><div class="card-sub">Las define el currículo priorizado con énfasis en competencias. Se aplican de forma automática</div></div></div>
+  <div class="card-body"><div class="mapa-info" id="mapa-info">Elige una destreza para ver sus competencias e inserciones curriculares.</div></div>
 </div>
 
 <!-- COMPETENCIAS -->
@@ -467,6 +488,69 @@ $('ins-grid').addEventListener('click',e=>{const c=e.target.closest('.chip');if(
 function getComps(){return[...document.querySelectorAll('#comp-grid .chip.on-p')].map(e=>e.dataset.v);}
 function getIns(){return[...document.querySelectorAll('#ins-grid .chip.on-b')].map(e=>e.dataset.v);}
 
+// ---------- MAPA DE DESTREZAS DEL CURRÍCULO PRIORIZADO ----------
+let MAPA=null, mapaSel=null, mapaLista=[];
+const SUBKEY={'Básica Elemental (2do–4to grado)':'Elemental','Básica Media (5to–7mo grado)':'Media','Básica Superior (8vo–10mo grado)':'Superior'};
+const ASIG_BASE=$('asignatura').innerHTML;
+const TIPO={se:['educación socioemocional','Educación Socioemocional'],ds:['desarrollo sostenible','Educación para el Desarrollo Sostenible'],vi:['seguridad vial','Educación para la Seguridad Vial y Movilidad Sostenible'],ci:['cívica, ética e integridad','Educación Cívica, Ética e Integridad'],si:['seguridad integral','Educación para la Seguridad Integral'],fi:['educación financiera','Educación Financiera']};
+const COMPK={c:['comunicacional','Competencias comunicacionales'],m:['matemática','Competencias matemáticas'],d:['digital','Competencias digitales'],s:['socioemocional','Competencias socioemocionales']};
+const OTRA='Otra asignatura (optativa)';
+const plano=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+fetch('mapa.json').then(r=>r.json()).then(j=>{MAPA=j;alCambiarSubnivel();}).catch(()=>{});
+function subKey(){return SUBKEY[$('subnivel').value]||'';}
+function enMapa(){const k=subKey();return !!(MAPA&&k&&MAPA.m[k]&&MAPA.m[k][$('asignatura').value]);}
+function alCambiarSubnivel(){
+  const k=subKey(),sel=$('asignatura'),prev=sel.value;
+  if(MAPA&&k){sel.innerHTML='<option value="">Selecciona la asignatura</option>'+Object.keys(MAPA.m[k]).map(a=>`<option>${esc(a)}</option>`).join('')+`<option>${OTRA}</option>`;}
+  else sel.innerHTML=ASIG_BASE;
+  if([...sel.options].some(o=>o.value===prev))sel.value=prev;
+  alCambiarAsignatura();
+}
+function alCambiarAsignatura(){
+  limpiarSeleccion(true);
+  $('buscar').value='';
+  aplicarModo();
+  if(enMapa())filtrar();
+}
+function aplicarModo(){
+  const m=enMapa(),oculto=$('res-wrap').classList.contains('show');
+  $('mapa-box').classList.toggle('show',m);
+  if(oculto)return;
+  $('s-mapa').style.display=m?'block':'none';
+  $('s-comp').style.display=m?'none':'block';
+  $('s-ins').style.display=m?'none':'block';
+  $('destreza').readOnly=m;
+  $('destreza').placeholder=m?'Elige la destreza en el buscador de arriba':'Escribe la destreza exactamente como aparece en el currículo MINEDUC...';
+}
+function filtrar(){
+  const k=subKey(),lista=MAPA.m[k][$('asignatura').value]||[];
+  const q=plano($('buscar').value).split(/\s+/).filter(Boolean);
+  mapaLista=lista.filter(e=>{const t=plano(e.c+' '+e.t+' '+e.n.map(x=>x[1]).join(' '));return q.every(w=>t.includes(w));});
+  $('sel-destreza').innerHTML=`<option value="">Selecciona la destreza (${mapaLista.length})</option>`+mapaLista.map((e,i)=>`<option value="${i}">${esc(e.c)}. ${esc(e.t.length>150?e.t.slice(0,150)+'…':e.t)}${e.r?' ['+esc(e.r)+']':''}</option>`).join('');
+  $('mapa-cuenta').textContent=q.length?`${mapaLista.length} destrezas coinciden con tu búsqueda. Incluye también el contenido de las inserciones.`:`${lista.length} destrezas de ${$('asignatura').value} en este subnivel.`;
+}
+function limpiarSeleccion(borrar){
+  if(mapaSel||borrar&&$('destreza').readOnly){$('destreza').value='';$('indicador').value='';}
+  mapaSel=null;$('ind-hint').textContent='';
+  $('mapa-info').innerHTML='Elige una destreza para ver sus competencias e inserciones curriculares.';
+}
+function elegirDestreza(){
+  const i=$('sel-destreza').value;
+  if(i===''){limpiarSeleccion(false);return;}
+  const e=mapaLista[+i];mapaSel=e;
+  $('destreza').value=e.c+'. '+e.t;
+  const ind=MAPA.ind[e.i]||'';
+  $('indicador').value=ind;
+  $('ind-hint').textContent=ind.includes('\n')?'El currículo trae varios indicadores para el criterio de esta destreza. Deja solo el que vas a evaluar en esta clase.':'Indicador del currículo priorizado. Puedes ajustarlo a tu clase.';
+  const comps=[...e.k].map(c=>COMPK[c][1]);
+  $('mapa-info').innerHTML=`<div class="mc"><b>Competencias:</b> ${comps.length?esc(comps.join(', ')):'El currículo no marca una competencia específica en esta destreza.'}</div>`
+    +(e.n.length?e.n.map(x=>`<div class="mi"><b>${esc(TIPO[x[0]][1])}:</b> ${esc(x[1])}</div>`).join(''):'<div class="mi">El currículo no marca inserciones curriculares en esta destreza.</div>');
+}
+$('subnivel').addEventListener('change',alCambiarSubnivel);
+$('asignatura').addEventListener('change',alCambiarAsignatura);
+$('buscar').addEventListener('input',()=>{if(enMapa()){filtrar();}});
+$('sel-destreza').addEventListener('change',elegirDestreza);
+
 async function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 function setStep(n,msg){
   $('prog-msg').textContent=msg;
@@ -520,7 +604,7 @@ ${e.insercion?`<p><i>Inserción curricular: ${esc(e.insercion)}</i></p>`:''}
 <tr>${h('Tema',3)}${c(esc(plan.tema||d.tema),9)}</tr>
 <tr>${h('Objetivo',3)}${c(esc(plan.objetivo),9)}</tr>
 <tr>${h('Destreza con criterio de desempeño',6)}${h('Indicador de evaluación',6)}</tr>
-<tr>${c('<p>'+esc(d.destreza)+'</p>'+desag,6)}${c(esc(d.indicador),6)}</tr>
+<tr>${c('<p>'+esc(d.destreza)+'</p>'+desag,6)}${c(esc(d.indicador).replace(/\n/g,'<br>'),6)}</tr>
 <tr>${h('PLANIFICACIÓN',12)}</tr>
 <tr>${h('ORIENTACIONES METODOLÓGICAS PARA LA ENSEÑANZA Y APRENDIZAJE',6)}${h('RECURSOS',3)}${h('ORIENTACIONES PARA LA EVALUACIÓN',3)}</tr>
 <tr>${c(acts,6)}${c(recs,3)}${c(`<p><b>Técnica:</b> ${esc(plan.tecnica)}</p><p><b>Instrumento de evaluación:</b> ${esc(plan.instrumento)}</p>`,3)}</tr>
@@ -545,7 +629,7 @@ function rubricaHTML(d,plan){
 <tr>${h('RÚBRICA DE EVALUACIÓN',12)}</tr>
 <tr>${h('Tema',2)}${c(esc(plan.tema||d.tema),3)}${h('Asignatura',2)}${c(esc(d.asignatura),2)}${h('Grado/Curso',2)}${c(esc(d.grado),1)}</tr>
 <tr>${h('Estudiante',2)}${c('',6)}${h('Fecha',2)}${c('',2)}</tr>
-<tr>${h('Indicador de evaluación',2)}${c(esc(d.indicador),10)}</tr>
+<tr>${h('Indicador de evaluación',2)}${c(esc(d.indicador).replace(/\n/g,'<br>'),10)}</tr>
 <tr>${h('Criterio',2)}${h('Domina los aprendizajes requeridos (9 a 10)',3)}${h('Alcanza los aprendizajes requeridos (7 a 8,99)',2)}${h('Próximo a alcanzar los aprendizajes requeridos (4,01 a 6,99)',2)}${h('No alcanza los aprendizajes requeridos (4 o menos)',2)}${h('Puntaje',1)}</tr>
 ${rub.map(r=>`<tr>${c('<b>'+esc(r.criterio)+'</b>',2)}${c(esc(r.dar),3)}${c(esc(r.aar),2)}${c(esc(r.paar),2)}${c(esc(r.naar),2)}${c('',1)}</tr>`).join('')}
 <tr>${h('Calificación final (promedio de los criterios)',11)}${c('',1)}</tr>
@@ -563,10 +647,20 @@ async function generar(){
     secuencia:getSeq(),metodologia:getMetod(),competencias:getComps(),inserciones:getIns(),
     nee_ajuste:val('nee_ajuste'),nee_adaptacion:val('nee_adaptacion'),destreza_desagregada:val('destreza_desagregada')
   };
+  if(enMapa()&&mapaSel){
+    d.competencias=[...mapaSel.k].map(c=>COMPK[c][0]);
+    d.inserciones=mapaSel.n.map(x=>TIPO[x[0]][0]);
+    d.ejes=mapaSel.n.map(x=>({insercion:TIPO[x[0]][1],contenido:x[1]}));
+    d.codigo=mapaSel.c;d.criterio=mapaSel.r;d.origen_destreza='mapa';
+  }else d.origen_destreza='manual';
   const [periodos,minutos]=$('periodos').value.split('|');
   const errEl=$('err-msg');
   errEl.classList.remove('show');
 
+  if(enMapa()&&!mapaSel){
+    errEl.textContent='Elige la destreza en el buscador del currículo priorizado.';
+    errEl.classList.add('show');return;
+  }
   if(!d.subnivel||!d.asignatura||!d.grado||!d.destreza||!d.indicador){
     errEl.textContent='Completa los campos obligatorios: subnivel, asignatura, grado, destreza e indicador.';
     errEl.classList.add('show');return;
@@ -621,6 +715,7 @@ async function generar(){
 function nueva(){
   document.querySelectorAll('.main > .card').forEach(c=>c.style.display='block');
   $('res-wrap').classList.remove('show');
+  aplicarModo();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
