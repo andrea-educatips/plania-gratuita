@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const cuenta = require("./cuenta.js");
 
 // Envía una fila al registro de investigación. Si falla, la planificación se entrega igual.
 async function registrar(fila) {
@@ -36,6 +37,13 @@ exports.handler = async (event) => {
 
   try {
     const b = JSON.parse(event.body || "{}");
+    // Solo las cuentas registradas generan planificaciones. El cupo gratuito y la suscripción se revisan aquí.
+    const store = cuenta.abrir(event);
+    let usuario = await cuenta.usuarioDeToken(store, b.token);
+    if (!usuario) return { statusCode: 401, headers, body: JSON.stringify({ error: "Ingresa con tu correo para generar planificaciones.", codigo: "sesion" }) };
+    const acc = await cuenta.acceso(store, usuario);
+    usuario = acc.u;
+    if (!acc.ok) return { statusCode: 402, headers, body: JSON.stringify({ error: "Ya usaste tus planificaciones gratuitas.", codigo: "limite", usuario: cuenta.publico(usuario) }) };
     const subnivel = txt(b.subnivel, 80), asignatura = txt(b.asignatura, 80), grado = txt(b.grado, 60);
     const periodos = txt(b.periodos, 30), minutos = txt(b.minutos, 30);
     const secuencia = b.secuencia === "ACC" ? "ACC" : "ERCA";
@@ -228,7 +236,10 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
       plan_json: JSON.stringify(plan),
     });
 
-    return { statusCode: 200, headers, body: JSON.stringify({ plan, plan_id }) };
+    usuario.usos = (usuario.usos || 0) + 1;
+    usuario.ultimo_uso = new Date().toISOString();
+    await store.setJSON("u/" + usuario.email, usuario);
+    return { statusCode: 200, headers, body: JSON.stringify({ plan, plan_id, usuario: cuenta.publico(usuario) }) };
 
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message || "Error interno." }) };
