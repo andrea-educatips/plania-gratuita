@@ -535,7 +535,7 @@ let USR=null;
 const tk=()=>{try{return localStorage.getItem('plania_token')||'';}catch(e){return '';}};
 const setTk=t=>{try{t?localStorage.setItem('plania_token',t):localStorage.removeItem('plania_token');}catch(e){}};
 async function cuentaApi(datos){
-  const r=await fetch('/.netlify/functions/cuenta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
+  const r=await fetch('/.netlify/functions/acceso',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
   const j=await r.json().catch(()=>({}));
   if(!r.ok) throw Object.assign(new Error(j.error||'No se pudo completar la acción.'),{status:r.status});
   return j;
