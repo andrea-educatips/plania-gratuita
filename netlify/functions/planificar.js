@@ -39,7 +39,10 @@ exports.handler = async (event) => {
     const subnivel = txt(b.subnivel, 80), asignatura = txt(b.asignatura, 80), grado = txt(b.grado, 60);
     const periodos = txt(b.periodos, 30), minutos = txt(b.minutos, 30);
     const secuencia = b.secuencia === "ACC" ? "ACC" : "ERCA";
-    const destreza = txt(b.destreza, 1200), indicador = txt(b.indicador, 800), tema = txt(b.tema, 200);
+    const destreza = txt(b.destreza, 1200), indicador = txt(b.indicador, 1500), tema = txt(b.tema, 200);
+    // Contenidos de inserción definidos por el currículo para la destreza elegida en el mapa.
+    const ejes = (Array.isArray(b.ejes) ? b.ejes : []).map((x) => ({ insercion: txt(x && x.insercion, 90), contenido: txt(x && x.contenido, 320) })).filter((x) => x.insercion && x.contenido).slice(0, 6);
+    const deMapa = b.origen_destreza === "mapa";
     const competencias = lista(b.competencias), inserciones = lista(b.inserciones);
     const neeAjuste = txt(b.nee_ajuste, 800), neeAdaptacion = txt(b.nee_adaptacion, 800);
     const desagDocente = txt(b.destreza_desagregada, 1200);
@@ -61,7 +64,12 @@ exports.handler = async (event) => {
     }
 
     const compStr = competencias.length ? competencias.join(", ") : "ninguna específica";
-    const insStr  = inserciones.length  ? inserciones.join(", ")  : "ninguna específica";
+    const insStr  = ejes.length ? ejes.map((x) => `${x.insercion}: ${x.contenido}`).join(" | ") : (inserciones.length ? inserciones.join(", ") : "ninguna específica");
+    const insRegla = ejes.length
+      ? `el currículo priorizado define para esta destreza estos contenidos de inserción curricular: ${ejes.map((x) => `${x.insercion} = "${x.contenido}"`).join("; ")}. Trabaja EXACTAMENTE esos contenidos dentro de las etapas, de forma natural y visible en lo que hacen los estudiantes. No los cambies ni agregues otros. En "ejes_transversales" cópialos tal cual`
+      : (deMapa
+        ? `el currículo no marca inserciones curriculares en esta destreza. No incluyas ninguna: deja "ejes_transversales" como lista vacía y el campo "insercion" de cada etapa como cadena vacía`
+        : `por cada inserción elegida escoge UN contenido específico y concreto (por ejemplo, en educación socioemocional: comunicación asertiva; en educación financiera: ahorro; en seguridad vial: señales de tránsito). Trabaja ese mismo contenido dentro de las etapas, de forma natural, y decláralo en "ejes_transversales"`);
     const metStr  = txt(b.metodologia, 80) || "sin metodología específica";
     const metRegla = METODOS[metStr]
       ? `La metodología ${metStr} se aplica en TODA la clase y debe reconocerse en las actividades sin necesidad de nombrarla: ${METODOS[metStr]}`
@@ -126,7 +134,7 @@ REGLAS OBLIGATORIAS:
 2. Cada etapa tiene sus tres principios DUA detallados (Representación, Acción y expresión, Implicación)
 3. METODOLOGÍA: ${metRegla}
 4. Actividades colaborativas y kinestésicas, pensadas para un aula sin tecnología
-5. INSERCIONES: por cada inserción elegida escoge UN contenido específico y concreto (por ejemplo, en educación socioemocional: comunicación asertiva; en educación financiera: ahorro; en seguridad vial: señales de tránsito). Trabaja ese mismo contenido dentro de las etapas, de forma natural, y decláralo en "ejes_transversales"
+5. INSERCIONES: ${insRegla}
 5b. COMPETENCIAS: las competencias elegidas (${compStr}) van implícitas. NO las nombres ni escribas frases que digan dónde se aplican. Deben cumplirse de verdad en lo que hacen los estudiantes: la comunicacional con producción oral o escrita y escucha entre pares; la matemática con contar, medir, comparar, estimar o razonar con datos; la digital con manejo de información, secuencias de pasos o pensamiento computacional desconectado; la socioemocional con reconocimiento de emociones, empatía, acuerdos y trabajo con otros
 5c. DESAGREGACIÓN: ${desagDocente ? 'el docente ya escribió la destreza desagregada; cópiala sin cambios en "destreza_desagregada" y planifica para ese alcance' : 'desagrega la destreza oficial para lo que realmente se puede lograr en esta clase con este tema y este tiempo, manteniendo su estructura (habilidad + contenido + nivel de complejidad) y sin inventar códigos. Si la destreza ya es acotada, repítela'}. Todas las actividades y la rúbrica responden a la destreza desagregada
 6. Genera el objetivo automáticamente coherente con la destreza y el tema
@@ -189,7 +197,10 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
     try { plan = JSON.parse(raw.replace(/```json|```/g, "").trim()); }
     catch { throw new Error("PLANIA no devolvió un JSON válido. Intenta de nuevo."); }
 
-    if (!inserciones.length) plan.ejes_transversales = [];
+    if (ejes.length) plan.ejes_transversales = ejes;
+    else if (!inserciones.length || deMapa) plan.ejes_transversales = [];
+    plan.origen_destreza = deMapa ? "mapa" : "manual";
+    if (deMapa) { plan.codigo_destreza = txt(b.codigo, 20); plan.criterio = txt(b.criterio, 20); }
     if (desagDocente) plan.destreza_desagregada = desagDocente;
     plan.desagregacion_origen = desagDocente ? "docente" : "plania";
     const plan_id = crypto.randomUUID();
