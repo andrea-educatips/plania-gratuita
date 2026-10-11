@@ -294,6 +294,11 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
         <textarea id="destreza" placeholder="Escribe la destreza exactamente como aparece en el currículo MINEDUC..."></textarea>
       </div>
       <div class="field full">
+        <label>Destreza desagregada</label>
+        <textarea id="destreza_desagregada" placeholder="Opcional. Escribe aquí tu propia desagregación si ya la tienes"></textarea>
+        <span class="hint">Si lo dejas vacío, PLANIA propone la desagregación según el tema y el tiempo de la clase.</span>
+      </div>
+      <div class="field full">
         <label>Indicador de logro <span class="req">*</span></label>
         <input type="text" id="indicador" placeholder="Ej: Identifica la idea principal de un texto expositivo">
       </div>
@@ -337,7 +342,7 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
 
 <!-- METODOLOGÍA -->
 <div class="card" id="s-metod">
-  <div class="card-hdr"><div class="card-icon ic-g">⚡</div><div><div class="card-title">Metodología de la Experiencia / Anticipación</div><div class="card-sub">Opcional</div></div></div>
+  <div class="card-hdr"><div class="card-icon ic-g">⚡</div><div><div class="card-title">Metodología activa de la clase</div><div class="card-sub">Opcional. Se aplica en toda la clase</div></div></div>
   <div class="card-body">
     <div class="metod-grid" id="metod-grid">
       <button class="mb on" data-m="">Sin metodología específica</button>
@@ -497,6 +502,8 @@ ${e.insercion?`<p><i>Inserción curricular: ${esc(e.insercion)}</i></p>`:''}
 <p><b>DUA P3. Compromiso:</b> ${esc(e.implicacion)}</p>`;
   }).join('');
   const recs=Array.isArray(plan.recursos)?plan.recursos.map(r=>`<p><b>${esc(r.nombre)}</b>${r.detalle?': '+esc(r.detalle):''}${r.busqueda?`<br><a href="https://www.google.com/search?q=${encodeURIComponent(r.busqueda)}" target="_blank" rel="noopener">Buscar material de apoyo</a>`:''}</p>`).join(''):esc(plan.recursos);
+  const ejes=Array.isArray(plan.ejes_transversales)?plan.ejes_transversales.filter(x=>x&&(x.insercion||x.contenido)).map(x=>`<p><b>${esc(x.insercion)}:</b> ${esc(x.contenido)}</p>`).join(''):esc(plan.ejes_transversales);
+  const desag=plan.destreza_desagregada&&plan.destreza_desagregada.trim()!==d.destreza.trim()?`<p style="margin-top:6px"><b>Destreza desagregada para esta clase${plan.desagregacion_origen==='plania'?' (propuesta por PLANIA)':''}:</b> ${esc(plan.destreza_desagregada)}</p>`:'';
   const aj=Array.isArray(plan.ajustes_razonables)?plan.ajustes_razonables:[];
   const filasAj=(aj.length?aj:[{}]).map(a=>`<tr>${c('',2)}${c(esc(a.motivo),3)}${c(esc(a.actividad),3)}${c(esc(a.ajuste),4)}</tr>`).join('');
   const ad=plan.adaptacion_curricular||{};
@@ -509,11 +516,11 @@ ${e.insercion?`<p><i>Inserción curricular: ${esc(e.insercion)}</i></p>`:''}
 <tr>${h('COMPETENCIAS',4)}${COMPS.map(x=>marca(d.competencias,x,2)).join('')}</tr>
 <tr>${INSER.map(x=>marca(d.inserciones,x,2)).join('')}</tr>
 <tr>${h('DISEÑO UNIVERSAL PARA EL APRENDIZAJE',3)}${h('P1. MÚLTIPLES FORMAS DE REPRESENTACIÓN',3)}${h('P2. MÚLTIPLES FORMAS DE ACCIÓN Y EXPRESIÓN',3)}${h('P3. MÚLTIPLES FORMAS DE COMPROMISO',3)}</tr>
-<tr>${h('Ejes Transversales',3)}${c(esc(plan.ejes_transversales),9)}</tr>
+<tr>${h('Ejes Transversales',3)}${c(ejes,9)}</tr>
 <tr>${h('Tema',3)}${c(esc(plan.tema||d.tema),9)}</tr>
 <tr>${h('Objetivo',3)}${c(esc(plan.objetivo),9)}</tr>
 <tr>${h('Destreza con criterio de desempeño',6)}${h('Indicador de evaluación',6)}</tr>
-<tr>${c(esc(d.destreza),6)}${c(esc(d.indicador),6)}</tr>
+<tr>${c('<p>'+esc(d.destreza)+'</p>'+desag,6)}${c(esc(d.indicador),6)}</tr>
 <tr>${h('PLANIFICACIÓN',12)}</tr>
 <tr>${h('ORIENTACIONES METODOLÓGICAS PARA LA ENSEÑANZA Y APRENDIZAJE',6)}${h('RECURSOS',3)}${h('ORIENTACIONES PARA LA EVALUACIÓN',3)}</tr>
 <tr>${c(acts,6)}${c(recs,3)}${c(`<p><b>Técnica:</b> ${esc(plan.tecnica)}</p><p><b>Instrumento de evaluación:</b> ${esc(plan.instrumento)}</p>`,3)}</tr>
@@ -554,7 +561,7 @@ async function generar(){
     periodo_lectivo:val('periodo_lectivo'),unidad:val('unidad'),titulo_unidad:val('titulo_unidad'),paralelo:val('paralelo'),
     fecha_inicio:$('fecha_inicio').value,fecha_fin:$('fecha_fin').value,
     secuencia:getSeq(),metodologia:getMetod(),competencias:getComps(),inserciones:getIns(),
-    nee_ajuste:val('nee_ajuste'),nee_adaptacion:val('nee_adaptacion')
+    nee_ajuste:val('nee_ajuste'),nee_adaptacion:val('nee_adaptacion'),destreza_desagregada:val('destreza_desagregada')
   };
   const [periodos,minutos]=$('periodos').value.split('|');
   const errEl=$('err-msg');
