@@ -196,6 +196,7 @@ REGLAS OBLIGATORIAS:
 11. DESAGREGACIÓN DE LA DESTREZA: ${desagDocente ? 'el docente ya escribió la destreza desagregada; cópiala sin cambios en "destreza_desagregada" y planifica para ese alcance' : 'desagrega la destreza principal para lo que realmente se puede lograr en esta clase con este tema y este tiempo, manteniendo su estructura (habilidad + contenido + nivel de complejidad) y sin inventar códigos. Si ya es acotada, repítela'}.
 12. DESAGREGACIÓN DEL INDICADOR: en "indicador_desagregado" redacta el indicador elegido acotado a lo que se planificó en las actividades y estrategias de esta clase, con la estructura del indicador oficial (qué logra el estudiante, cómo lo demuestra y en qué contexto). La rúbrica responde a este indicador desagregado.
 13. TAXONOMÍA DE MARZANO: los verbos y la demanda cognitiva de cada etapa corresponden a su "nivel_marzano" (Recuperación: reconocer, recordar, ejecutar. Comprensión: integrar, simbolizar. Análisis: comparar, clasificar, analizar errores, generalizar, especificar. Utilización del conocimiento: tomar decisiones, resolver problemas, experimentar, investigar).
+13b. RIGOR: los contenidos de las disciplinas (historia, ciencias, matemática, lengua) deben ser correctos y fieles al currículo. No inventes datos, fechas, nombres ni hechos, y no suavices ni idealices procesos históricos: si la destreza habla de dominación, conquista o conflicto, el texto lo presenta como tal.
 14. Cada etapa tiene sus tres principios DUA detallados. Distribuye el tiempo de modo que la suma sea exactamente ${minutos}. Genera el objetivo coherente con la destreza y el tema. Redacción humanizada y pedagógicamente sólida.
 15. RECURSOS: detalla cada recurso con cantidad y cómo se prepara o se usa. Si un recurso se beneficia de material de apoyo en internet, escribe en "busqueda" las palabras exactas para encontrarlo. NO escribas direcciones web. RÚBRICA: de 3 a 4 criterios derivados del indicador desagregado y de las actividades, con descriptores observables y distintos en cada nivel de la escala ecuatoriana.${preferencias ? `
 15b. INDICACIONES DEL DOCENTE: respeta sus preferencias y usa el contenido de su libro como base de textos, ejemplos y ejercicios, siempre que no contradigan el currículo ni estas reglas.` : ""}${neeReglas}
@@ -272,7 +273,10 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
     if (!(digitales === "no" && compTodas.includes("digital"))) plan.tarea_casa = null;
     // Quita las siglas de competencias que no corresponden a esta planificación.
     const validas = new Set(compTodas.map((c) => SIGLA[c]));
-    const limpiaSiglas = (t) => typeof t === "string" ? t.replace(/\s*\((CC|CM|CD|CS)\)/g, (m, g) => (validas.has(g) ? ` (${g})` : "")) : t;
+    const limpiaSiglas = (t) => typeof t === "string" ? t.replace(/\s*\(((?:CC|CM|CD|CS)(?:\s*[,y]\s*(?:CC|CM|CD|CS))*)\)/g, (m, g) => {
+      const ok = [...new Set(g.split(/\s*[,y]\s*/).filter((x) => validas.has(x)))];
+      return ok.length ? " " + ok.map((x) => `(${x})`).join(" ") : "";
+    }) : t;
     if (plan.etapas && typeof plan.etapas === "object") Object.values(plan.etapas).forEach((e) => {
       if (e && Array.isArray(e.pasos)) e.pasos = e.pasos.map(limpiaSiglas);
       if (e && Array.isArray(e.preguntas)) e.preguntas = e.preguntas.map(limpiaSiglas);
