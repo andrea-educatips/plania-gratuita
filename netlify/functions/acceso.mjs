@@ -277,6 +277,22 @@ export default async (req) => {
       return out(200, { ok: true });
     }
 
+    // Resultados de la generación en segundo plano.
+    if (accion === "trabajo_guardar") {
+      const id = txt(b.trabajo_id, 60);
+      if (!/^[a-zA-Z0-9-]{8,60}$/.test(id)) return out(400, { error: "Trabajo no válido." });
+      const body = typeof b.body === "string" ? b.body.slice(0, 600000) : "";
+      await store.setJSON("t/" + u.email + "/" + id, { status: parseInt(b.status, 10) || 500, body, fecha: Date.now() });
+      return out(200, { ok: true });
+    }
+    if (accion === "trabajo_ver") {
+      const id = txt(b.trabajo_id, 60);
+      const t = await store.get("t/" + u.email + "/" + id, { type: "json" });
+      if (!t) return out(200, { pendiente: true });
+      await store.delete("t/" + u.email + "/" + id).catch(() => {});
+      return out(200, { pendiente: false, status: t.status, body: t.body });
+    }
+
     // Historial del docente: lo ve siempre, tenga o no suscripción.
     if (accion === "mis_planes") {
       const { blobs } = await store.list({ prefix: "h/" + u.email + "/" });

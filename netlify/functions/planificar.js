@@ -49,7 +49,7 @@ const EXIGE = {
   "socioemocional": "los estudiantes reconocen y comprenden sus propias emociones, pensamientos y conductas, comprenden las de los demás y se relacionan de forma positiva: colaboran, llegan a acuerdos o toman decisiones responsables",
 };
 
-exports.handler = async (event) => {
+async function procesar(event) {
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type",
@@ -352,4 +352,7 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message || "Error interno." }) };
   }
-};
+}
+
+exports.procesar = procesar;
+exports.handler = procesar;
