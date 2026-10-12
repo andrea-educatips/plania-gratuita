@@ -34,6 +34,13 @@ const limpiaEjes = (v) => (Array.isArray(v) ? v : []).map((x) => ({ insercion: t
 
 // Siglas con las que se marca en cada actividad la competencia que se desarrolla.
 const SIGLA = { "comunicacional": "CC", "matemática": "CM", "digital": "CD", "socioemocional": "CS" };
+// Siglas de las inserciones curriculares, a partir del nombre largo (mapa) o corto (selección manual).
+const SIGLA_INS = [
+  [/socioemocional/i, "ES"], [/desarrollo sostenible/i, "EDS"], [/seguridad vial/i, "ESV"],
+  [/c[ií]vica/i, "ECEI"], [/seguridad integral/i, "ESI"], [/financiera/i, "EF"],
+];
+const siglaIns = (nombre) => { const f = SIGLA_INS.find(([re]) => re.test(nombre || "")); return f ? f[1] : ""; };
+const INICIOS = { "situacion": "una situación de aprendizaje", "juego": "un juego", "lectura": "una lectura", "experimento": "un experimento" };
 // Lo que exige cada competencia según el Currículo priorizado con énfasis en competencias (MINEDUC), apartado 3.
 const EXIGE = {
   "comunicacional": "los estudiantes escuchan o leen un texto y lo comprenden, o producen un texto oral o escrito y su destinatario es capaz de comprenderlo; hay escucha activa y enunciación ordenada y coherente de ideas",
@@ -74,6 +81,8 @@ exports.handler = async (event) => {
     const desagDocente = txt(b.destreza_desagregada, 1200);
     const preferencias = txt(b.preferencias, 3000);
     const digitales = b.digitales === "si" ? "si" : (b.digitales === "no" ? "no" : "");
+    const invertida = txt(b.metodologia, 80) === "Aula invertida";
+    const inicio = invertida ? "invertida" : (INICIOS[b.inicio] ? b.inicio : "plania");
     // Hasta dos destrezas secundarias, de cualquier área, que se transversalizan.
     const secundarias = (Array.isArray(b.secundarias) ? b.secundarias : []).slice(0, 2).map((x) => ({
       codigo: txt(x && x.codigo, 20), asignatura: txt(x && x.asignatura, 80), destreza: txt(x && x.destreza, 900),
@@ -116,13 +125,22 @@ exports.handler = async (event) => {
       ? [["Anticipación","Activación de conocimientos previos"],["Construcción","Construcción del conocimiento"],["Consolidación","Transferencia y aplicación"]]
       : [["Experiencia","Recuperación"],["Reflexión","Comprensión"],["Conceptualización","Análisis"],["Aplicación","Utilización del conocimiento"]];
     const etInicio = etapas[0][0], etExplica = secuencia === "ACC" ? "Construcción" : "Conceptualización";
+    const etPreguntas = secuencia === "ACC" ? "Anticipación" : "Reflexión";
+    // Siglas válidas de inserciones para esta planificación (principal y secundarias).
+    const insNombres = [...ejes.map((x) => x.insercion), ...(ejes.length || deMapa ? [] : inserciones), ...secundarias.flatMap((x) => x.ejes.map((e) => e.insercion))];
+    const insSiglas = [...new Set(insNombres.map(siglaIns).filter(Boolean))];
+    const inicioRegla = inicio === "invertida"
+      ? `la metodología es aula invertida: el inicio es el trabajo previo que el estudiante hizo en casa. Describe ese trabajo previo en "inicio_texto" (qué leyó, observó o consultó, con el contenido concreto) y deja "inicio_tipo" como "Trabajo previo (aula invertida)". El primer paso de ${etInicio} recupera ese trabajo previo`
+      : `la clase inicia con ${inicio === "plania" ? "la actividad que mejor se ajuste a la destreza (situación de aprendizaje, juego, lectura, experimento, caso u otra); elígela tú" : INICIOS[inicio] + ", porque así lo eligió el docente"}. El inicio busca un aprendizaje significativo: conecta lo que el estudiante ya sabe con el nuevo conocimiento. No uses una lluvia de ideas como inicio. Redacta el inicio completo en "inicio_texto" (la situación narrada en 4 a 7 líneas, las reglas y la dinámica del juego, el texto de la lectura o el procedimiento del experimento con sus materiales) y su tipo en "inicio_tipo". El primer paso de ${etInicio} lo presenta`;
+    const transImplicita = secundarias.length
+      ? ""
+      : ` Cuando el inicio sea una situación de aprendizaje, integra en ella de forma natural un contenido de otra asignatura del mismo subnivel que se relacione con la destreza (por ejemplo de Estudios Sociales, Ciencias Naturales o Matemática), y también sus inserciones o competencias, sin declararlo como otra destreza. En un juego hazlo solo si encaja con naturalidad. En un experimento no es obligatorio.`;
 
     const etapaJson = (e) => `"${e[0].toLowerCase()}": {
       "nombre": "nombre descriptivo de la actividad",
       "nivel_marzano": "${e[1]}",
       "tiempo": "minutos asignados a esta etapa",
       "pasos": ["paso 1 detallado", "paso 2", "paso 3", "paso 4", "paso 5"],
-      "preguntas": ["pregunta 1 textual", "pregunta 2", "pregunta 3"],
       "material": "texto COMPLETO que el docente lee, escribe en la pizarra o entrega en esta etapa, mínimo 70 palabras",
       "representacion": "pauta del principio DUA Representación y cómo se aplica en esta etapa, mínimo 2 oraciones",
       "accion": "pauta del principio DUA Acción y expresión y cómo se aplica, mínimo 2 oraciones",
@@ -184,12 +202,12 @@ ${neeDatos}
 REGLAS OBLIGATORIAS:
 1. Todos los pasos inician con verbo en infinitivo.
 2. ACTIVIDADES REALES Y DETALLADAS: cada etapa tiene de 4 a 7 pasos en orden. Cada paso dice qué hace el docente y CÓMO lo hace, qué hacen los estudiantes, cómo se organizan, con qué material y qué producto se obtiene. Todo lo que el docente necesita decir o entregar va escrito completo dentro del paso: las preguntas, las consignas, el enunciado del problema, las reglas del juego, el texto breve original que se lee, los ejemplos y los datos. Prohibido escribir directrices vagas como "Explicar el tema", "Realizar una lluvia de ideas", "Plantear preguntas" o "Hacer una actividad" sin desarrollarlas.
-3. PREGUNTAS: cada etapa trae en "preguntas" de 3 a 5 preguntas escritas textualmente, las que el docente formula en esa etapa. Deben ser inferenciales (¿por qué crees que...?, ¿qué pasaría si...?, ¿qué relación hay entre...?) y crítico-valorativas (¿estás de acuerdo con...? ¿por qué?, ¿qué harías tú...?, ¿qué opinas de...?). Prohibidas las preguntas literales cuya respuesta se copia del texto, como "¿cuál es la idea principal?" o "¿qué menciona el autor?".
+3. PREGUNTAS DE ${etPreguntas.toUpperCase()}: escribe en "preguntas_reflexion" las preguntas que el docente formula en ${etPreguntas}, nacidas directamente de lo que se vivió en el inicio (la situación, el juego, la lectura o el experimento): una pregunta literal, una o dos inferenciales y una crítico-valorativa, en ese orden y sin rotularlas. ${secuencia === "ACC" ? "En ACC, la Anticipación reúne la experiencia inicial y la reflexión sobre ella." : "La Reflexión siempre analiza lo que se presentó en la Experiencia."} En las demás etapas no hace falta un bloque de preguntas.
 3b. MATERIAL: cada etapa trae en "material" el contenido completo que el docente necesita, ya redactado y listo para usar: el texto, discurso, cuento o noticia que se lee (original, de 100 a 200 palabras cuando se pide leer o escuchar), el enunciado del problema con sus datos, las reglas del juego o del debate, el ejemplo modelado paso a paso, o el organizador gráfico con todo su contenido. Si un paso dice "leer", "presentar", "explicar" o "dar reglas", lo que se lee, presenta, explica o regula está escrito en "material". Nunca escribas "un discurso ficticio", "un texto breve" o "ejemplos" sin redactarlos.
-4. ${etInicio.toUpperCase()}: parte de una SITUACIÓN DE APRENDIZAJE escrita en "situacion_aprendizaje": un caso o escena concreta del contexto cercano del estudiante ecuatoriano de ${grado}, narrada en 4 a 7 líneas, que plantea un conflicto o una pregunta que la clase va a resolver. El primer paso de ${etInicio} presenta esa situación y los siguientes la exploran.
+4. INICIO DE LA CLASE (${etInicio}): ${inicioRegla}. Debe estar situado en el contexto cercano del estudiante ecuatoriano de ${grado}.${transImplicita}
 5. ${etExplica.toUpperCase()}: siempre incluye la explicación del docente, coherente con la metodología, y con un recurso creativo que cambie según el tema (organizador gráfico construido en la pizarra con los estudiantes, demostración con material concreto, lectura guiada del libro con subrayado, analogía con algo cotidiano, dramatización, modelado paso a paso de un ejemplo, entre otros). En el "material" de esta etapa escribe las ideas clave que el docente explica, con su contenido real (no solo los títulos), y cómo queda el organizador o el ejemplo modelado.
 6. METODOLOGÍA: ${metRegla}.
-7. INSERCIONES: ${insRegla}. Las inserciones van IMPLÍCITAS: se integran dentro de la situación de aprendizaje, los ejemplos, los problemas, los textos y las preguntas, de modo que el estudiante las trabaja sin que se anuncien. No crees momentos aparte para ellas ni las nombres dentro de los pasos.
+7. INSERCIONES: ${insRegla}. Las inserciones van IMPLÍCITAS: se integran dentro del inicio, los ejemplos, los problemas, los textos y las preguntas, de modo que el estudiante las trabaja sin que se anuncien. No crees momentos aparte para ellas ni las nombres dentro de los pasos. ${insSiglas.length ? `Al final del paso donde se trabaja cada inserción escribe su sigla entre paréntesis: ${insSiglas.map((x) => `(${x})`).join(", ")}. Usa solo esas siglas` : "No escribas siglas de inserciones"}.
 8. COMPETENCIAS: cada competencia de la lista se desarrolla de verdad en al menos un paso, según lo que exige el currículo priorizado: ${compTodas.length ? compTodas.map((c) => `${c}: ${EXIGE[c]}`).join(". ") : "no hay competencias marcadas"}. Al final del paso donde se cumple escribe su sigla entre paréntesis: (CC), (CM), (CD) o (CS). Usa solo las siglas de las competencias de la lista. Las siglas de competencias no tienen relación con los códigos de las destrezas (CS.3.1.4 es una destreza de Estudios Sociales, no la competencia socioemocional). La competencia digital solo se marca cuando el estudiante interactúa con una herramienta digital.
 9. HERRAMIENTAS DIGITALES: ${digRegla}. ${casaRegla}.
 10. ${secundarias.length ? `TRANSVERSALIZACIÓN DE DESTREZAS: la destreza principal lleva el peso de la clase. Cada destreza secundaria se integra usando su contenido como tema o contexto de los textos, problemas, ejemplos o del producto de la clase (por ejemplo, si la secundaria es de Estudios Sociales, el texto que se lee o el debate trata ese contenido), de modo que se trabaje de verdad en al menos un paso y no como una mención forzada. Sus inserciones y competencias aparecen de forma más ligera. En "destrezas_transversales" indica en qué etapa y actividad se trabaja cada una` : `No hay destrezas secundarias: deja "destrezas_transversales" como lista vacía`}.
@@ -213,7 +231,9 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
   "destrezas_transversales": [
     { "codigo": "código de la destreza secundaria", "integracion": "etapa y actividad donde se trabaja" }
   ],
-  "situacion_aprendizaje": "situación de aprendizaje narrada",
+  "inicio_tipo": "Situación de aprendizaje, Juego, Lectura, Experimento u otro",
+  "inicio_texto": "contenido completo del inicio de la clase",
+  "preguntas_reflexion": ["pregunta literal", "pregunta inferencial", "pregunta crítico-valorativa"],
   "etapas": {
     ${etapas.map(etapaJson).join(",\n    ")}
   },
@@ -272,17 +292,19 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
     if (!secundarias.length) plan.destrezas_transversales = [];
     if (!(digitales === "no" && compTodas.includes("digital"))) plan.tarea_casa = null;
     // Quita las siglas de competencias que no corresponden a esta planificación.
-    const validas = new Set(compTodas.map((c) => SIGLA[c]));
-    const limpiaSiglas = (t) => typeof t === "string" ? t.replace(/\s*\(((?:CC|CM|CD|CS)(?:\s*[,y]\s*(?:CC|CM|CD|CS))*)\)/g, (m, g) => {
+    const validas = new Set([...compTodas.map((c) => SIGLA[c]), ...insSiglas]);
+    const limpiaSiglas = (t) => typeof t === "string" ? t.replace(/\s*\(((?:CC|CM|CD|CS|ES|EDS|ESV|ECEI|ESI|EF)(?:\s*[,y]\s*(?:CC|CM|CD|CS|ES|EDS|ESV|ECEI|ESI|EF))*)\)/g, (m, g) => {
       const ok = [...new Set(g.split(/\s*[,y]\s*/).filter((x) => validas.has(x)))];
       return ok.length ? " " + ok.map((x) => `(${x})`).join(" ") : "";
     }) : t;
     if (plan.etapas && typeof plan.etapas === "object") Object.values(plan.etapas).forEach((e) => {
       if (e && Array.isArray(e.pasos)) e.pasos = e.pasos.map(limpiaSiglas);
-      if (e && Array.isArray(e.preguntas)) e.preguntas = e.preguntas.map(limpiaSiglas);
       if (e && typeof e.material === "string") e.material = limpiaSiglas(e.material);
     });
     if (plan.tarea_casa && plan.tarea_casa.consigna) plan.tarea_casa.consigna = limpiaSiglas(plan.tarea_casa.consigna);
+    if (Array.isArray(plan.preguntas_reflexion)) plan.preguntas_reflexion = plan.preguntas_reflexion.map(limpiaSiglas).slice(0, 4);
+    plan.inicio_elegido = inicio;
+    plan.inserciones_siglas = insSiglas;
     plan.origen_destreza = deMapa ? "mapa" : "manual";
     if (deMapa) { plan.codigo_destreza = txt(b.codigo, 20); plan.criterio = txt(b.criterio, 20); }
     if (desagDocente) plan.destreza_desagregada = desagDocente;
@@ -295,7 +317,7 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
     const datos = { subnivel, asignatura, grado, periodos, minutos, secuencia, trimestre: txt(b.trimestre, 20), area: txt(b.area, 80),
       institucion: txt(b.institucion, 150), periodo_lectivo: txt(b.periodo_lectivo, 30), unidad: txt(b.unidad, 20), titulo_unidad: txt(b.titulo_unidad, 150),
       metodologia: metStr, destreza, indicador, tema, codigo: txt(b.codigo, 20), criterio: txt(b.criterio, 20), origen_destreza: plan.origen_destreza,
-      competencias: compTodas, inserciones, digitales, preferencias, nee_ajuste: neeAjuste, nee_adaptacion: neeAdaptacion, destreza_desagregada: desagDocente };
+      competencias: compTodas, inserciones, digitales, inicio, preferencias, nee_ajuste: neeAjuste, nee_adaptacion: neeAdaptacion, destreza_desagregada: desagDocente };
 
     const [, uso] = await Promise.all([
       registrar({
@@ -314,6 +336,7 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
         codigo: datos.codigo,
         secundarias: secundarias.map((x) => x.codigo || x.destreza.slice(0, 60)).join(" | "),
         herramientas_digitales: digitales,
+        inicio,
         preferencias,
         nee_ajuste: neeAjuste,
         nee_adaptacion: neeAdaptacion,
