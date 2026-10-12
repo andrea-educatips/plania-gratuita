@@ -233,6 +233,17 @@ textarea[readonly]{background:var(--gray)}
 .main.oculto{display:none}
 .pay-precio{font-size:34px;font-weight:600;color:var(--green);text-align:center}
 .pay-precio span{font-size:14px;font-weight:400;color:var(--text2)}
+.chk-grid{display:flex;flex-wrap:wrap;gap:6px 14px}
+.chk-grid label{display:flex;gap:6px;align-items:center;font-weight:500;font-size:13px;color:var(--text)}
+.chk-grid input{width:auto;appearance:auto;-webkit-appearance:auto}
+.sec-slot{border:1px dashed var(--gray3);border-radius:var(--radius-sm);padding:.8rem;display:flex;flex-direction:column;gap:7px;margin-bottom:.7rem;background:var(--gray)}
+.sec-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--text2)}
+.sec-head a{color:#8a0000;cursor:pointer;font-weight:500;text-decoration:underline}
+.btn-sec{padding:9px 14px;border:1.5px solid var(--blue);border-radius:var(--radius-sm);background:var(--white);color:var(--blue);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer}
+.dig-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.val-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}
+.val-btn.on{background:var(--green);color:#fff}
+.sit-box{background:var(--blue-lt);border-left:3px solid var(--blue);padding:6px 9px;margin:0 0 8px}
 .pay-list{font-size:13px;color:var(--text2);line-height:1.8;margin:.8rem 0 1.1rem;padding-left:1.1rem}
 </style>
 </head>
@@ -271,7 +282,7 @@ textarea[readonly]{background:var(--gray)}
       <div id="paso-correo">
         <div class="field"><label>Nombre y apellido <span class="req">*</span></label><input type="text" id="f-nombre" autocomplete="name"></div>
         <div class="field"><label>Correo electrónico <span class="req">*</span></label><input type="email" id="f-email" placeholder="tucorreo@ejemplo.com" autocomplete="email"></div>
-        <label class="acc-check"><input type="checkbox" id="f-acepta"><span>Acepto que Andrea Educatips guarde mi nombre y mi correo para administrar mi cuenta y para enviarme información de sus cursos, productos y novedades. Puedo pedir que me retiren de la lista cuando quiera.</span></label>
+        <label class="acc-check"><input type="checkbox" id="f-acepta"><span id="txt-acepta">Autorizo a Andrea Educatips a guardar mis datos para administrar mi cuenta, enviarme información de sus cursos y productos, y usarlos de forma anónima con fines de investigación educativa. Puedo pedir que me retiren cuando quiera.</span></label>
         <button class="btn-gen" id="btn-codigo" onclick="pedirCodigo()">Enviarme el código</button>
         <span class="hint" style="display:block;margin-top:.6rem">Si ya tienes cuenta, basta con tu correo.</span>
       </div>
@@ -281,6 +292,37 @@ textarea[readonly]{background:var(--gray)}
         <span class="acc-link" onclick="volverCorreo()">Usar otro correo o pedir un código nuevo</span>
       </div>
       <div class="acc-msg" id="acc-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PERFIL DOCENTE -->
+<div class="acceso" id="perfil-box" style="max-width:720px">
+  <div class="card">
+    <div class="card-hdr"><div class="card-icon ic-p">👩‍🏫</div><div><div class="card-title">Cuéntanos sobre ti</div><div class="card-sub">Solo te lo pedimos una vez. Así PLANIA se ajusta mejor a tu realidad</div></div></div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="field full"><label>Nombre y apellido <span class="req">*</span></label><input type="text" id="p-nombre"></div>
+        <div class="field"><label>Nacionalidad <span class="req">*</span></label>
+          <select id="p-nac"><option value="">Selecciona</option><option>Ecuatoriana</option><option>Colombiana</option><option>Venezolana</option><option>Peruana</option><option>Cubana</option><option value="otra">Otra</option></select>
+          <input type="text" id="p-nac-otra" placeholder="Escribe tu nacionalidad" style="display:none;margin-top:6px"></div>
+        <div class="field"><label>Provincia donde trabajas <span class="req">*</span></label><select id="p-prov"></select></div>
+        <div class="field"><label>Tipo de institución <span class="req">*</span></label>
+          <select id="p-tipo"><option value="">Selecciona</option><option>Fiscal</option><option>Fiscomisional</option><option>Municipal</option><option>Particular</option></select></div>
+        <div class="field"><label>Años de experiencia docente <span class="req">*</span></label><input type="number" id="p-exp" min="0" max="60" inputmode="numeric"></div>
+        <div class="field full"><label>Nivel o niveles en los que trabajas <span class="req">*</span></label><div class="chk-grid" id="p-niveles"></div></div>
+        <div class="field"><label>Grado o curso <span class="req">*</span></label><input type="text" id="p-grados" placeholder="Ej: 4to de Básica, 2do BGU"></div>
+        <div class="field"><label>Área o asignaturas <span class="req">*</span></label><input type="text" id="p-areas" placeholder="Ej: Matemática, Lengua y Literatura"></div>
+        <div class="field"><label>Título más alto obtenido <span class="req">*</span></label>
+          <select id="p-titulo"><option value="">Selecciona</option><option>Bachiller</option><option>Técnico o tecnólogo</option><option>Licenciatura o profesorado en Ciencias de la Educación</option><option>Título de tercer nivel en otra área</option><option>Maestría</option><option>Doctorado</option></select></div>
+        <div class="field"><label>¿Estás estudiando actualmente? <span class="req">*</span></label>
+          <select id="p-estudia"><option value="">Selecciona</option><option>No, ya culminé mis estudios</option><option>Sí, estoy cursando mi carrera de tercer nivel</option><option>Sí, estoy cursando un posgrado</option></select></div>
+        <div class="field full"><label>¿Tus estudiantes tienen acceso a dispositivos e internet en la institución? <span class="req">*</span></label>
+          <select id="p-disp"><option value="">Selecciona</option><option>Sí, la mayoría de estudiantes tiene acceso a dispositivos e internet en la institución</option><option>Solo algunos estudiantes o en espacios limitados</option><option>No, los estudiantes no tienen acceso a dispositivos en la institución</option></select></div>
+      </div>
+      <label class="acc-check" id="p-acepta-box" style="margin-top:1rem"><input type="checkbox" id="p-acepta"><span>Autorizo a Andrea Educatips a guardar mis datos para administrar mi cuenta, enviarme información de sus cursos y productos, y usarlos de forma anónima con fines de investigación educativa. Puedo pedir que me retiren cuando quiera.</span></label>
+      <button class="btn-gen" id="btn-perfil" onclick="guardarPerfil()" style="margin-top:.6rem">Guardar y empezar a planificar</button>
+      <div class="acc-msg" id="perfil-msg"></div>
     </div>
   </div>
 </div>
@@ -370,6 +412,7 @@ textarea[readonly]{background:var(--gray)}
       </div>
       <div class="field full">
         <label>Indicador de logro <span class="req">*</span></label>
+        <select id="sel-ind" style="display:none;margin-bottom:6px"></select>
         <textarea id="indicador" placeholder="Ej: Identifica la idea principal de un texto expositivo"></textarea>
         <span class="hint" id="ind-hint"></span>
       </div>
@@ -465,6 +508,36 @@ textarea[readonly]{background:var(--gray)}
   </div>
 </div>
 
+<!-- DESTREZAS SECUNDARIAS -->
+<div class="card" id="s-sec" style="display:none">
+  <div class="card-hdr"><div class="card-icon ic-b">🔀</div><div><div class="card-title">Destrezas para transversalizar</div><div class="card-sub">Opcional. Hasta dos, de cualquier área del mismo subnivel</div></div></div>
+  <div class="card-body">
+    <div id="sec-slots"></div>
+    <button class="btn-sec" id="btn-sec" onclick="agregarSecundaria()">+ Agregar destreza para transversalizar</button>
+    <span class="hint" style="display:block;margin-top:.5rem">La destreza principal lleva el peso de la clase. Las secundarias se integran en algunas actividades, con sus competencias e inserciones.</span>
+  </div>
+</div>
+
+<!-- HERRAMIENTAS DIGITALES -->
+<div class="card" id="s-dig">
+  <div class="card-hdr"><div class="card-icon ic-g">💻</div><div><div class="card-title">¿Quieres actividades con herramientas digitales? <span class="req">*</span></div><div class="card-sub">Si eliges no y la destreza trae competencia digital, PLANIA sugiere una tarea para casa marcada con (CD)</div></div></div>
+  <div class="card-body">
+    <div class="dig-grid" id="dig-grid">
+      <button class="seq-btn" data-d="si">Sí, con herramientas digitales</button>
+      <button class="seq-btn" data-d="no">No, sin dispositivos en clase</button>
+    </div>
+  </div>
+</div>
+
+<!-- INDICACIONES DEL DOCENTE -->
+<div class="card" id="s-pref">
+  <div class="card-hdr"><div class="card-icon ic-p">✍️</div><div><div class="card-title">Indicaciones para PLANIA</div><div class="card-sub">Opcional. Se guarda para tus próximas planificaciones</div></div></div>
+  <div class="card-body">
+    <textarea id="preferencias" maxlength="3000" style="min-height:100px" placeholder="Pega aquí el contenido de tu libro de texto para esta clase, o escribe cómo te gusta que sean tus planificaciones. Ej: que tengan juegos, trabajo en parejas, lecturas cortas, ejercicios del libro página 45..."></textarea>
+    <span class="hint">Máximo 3.000 caracteres.</span>
+  </div>
+</div>
+
 <!-- NEE -->
 <div class="card" id="s-nee">
   <div class="card-hdr"><div class="card-icon ic-p">🧩</div><div><div class="card-title">Necesidades Educativas Específicas (NEE)</div><div class="card-sub">Opcional. No escribas nombres de estudiantes</div></div></div>
@@ -498,7 +571,7 @@ textarea[readonly]{background:var(--gray)}
       </div>
     </div>
     <div class="err-msg" id="err-msg"></div>
-    <p class="aviso-datos">PLANIA registra los datos de cada planificación para mejorar la herramienta y con fines de investigación educativa: subnivel, asignatura, destreza, opciones elegidas, institución si la escribes, el motivo de los ajustes o adaptaciones y la planificación generada. El nombre del docente que escribes en el encabezado no se guarda y no se piden nombres de estudiantes. El nombre y el correo de tu cuenta se guardan aparte, para administrar tu acceso y enviarte información de Andrea Educatips.</p>
+    <p class="aviso-datos">PLANIA guarda cada planificación en tu cuenta y registra sus datos de forma anónima para mejorar la herramienta y con fines de investigación educativa: subnivel, asignatura, destrezas, opciones elegidas, tus indicaciones, institución si la escribes y el motivo de los ajustes o adaptaciones. El nombre del docente que escribes en el encabezado no se guarda y no se piden nombres de estudiantes.</p>
   </div>
 </div>
 
@@ -543,8 +616,10 @@ async function cuentaApi(datos){
 function accMsg(t,clase,id){const e=$(id||'acc-msg');e.textContent=t||'';e.className='acc-msg'+(t?' show '+(clase||'err'):'');}
 function pintarUsuario(){
   const u=USR,box=$('usr');
-  if(!u){box.classList.remove('show');$('acceso').classList.add('show');$('main').classList.add('oculto');return;}
-  $('acceso').classList.remove('show');$('main').classList.remove('oculto');
+  if(!u){box.classList.remove('show');$('acceso').classList.add('show');$('perfil-box').classList.remove('show');$('main').classList.add('oculto');return;}
+  $('acceso').classList.remove('show');
+  if(!u.perfil_completo){abrirPerfil();}
+  else{$('perfil-box').classList.remove('show');$('main').classList.remove('oculto');if(!prefCargada){prefCargada=true;if(u.preferencias&&!val('preferencias'))$('preferencias').value=u.preferencias;}}
   let estado;
   if(u.suscripcion_activa) estado=`<span class="usr-pill">Suscripción activa hasta ${new Date(u.vence).toLocaleDateString('es-EC')}</span>`;
   else if(u.cobro_activo){const q=Math.max(0,u.limite-u.usos);estado=`<span class="usr-pill${q?'':' fin'}">${q?`Te quedan ${q} de ${u.limite} planificaciones gratuitas`:'Planificaciones gratuitas agotadas'}</span>${q?'':' <a onclick="abrirPago()">Suscribirme</a>'}`;}
@@ -581,6 +656,40 @@ function volverCorreo(){$('paso-codigo').style.display='none';$('paso-correo').s
 function salir(){const t=tk();setTk('');USR=null;pintarUsuario();if(t)cuentaApi({accion:'salir',token:t}).catch(()=>{});}
 $('f-codigo').addEventListener('keydown',e=>{if(e.key==='Enter')verificarCodigo();});
 $('f-email').addEventListener('keydown',e=>{if(e.key==='Enter')pedirCodigo();});
+// ---------- PERFIL DOCENTE ----------
+let prefCargada=false;
+const PROVINCIAS=['Azuay','Bolívar','Cañar','Carchi','Chimborazo','Cotopaxi','El Oro','Esmeraldas','Galápagos','Guayas','Imbabura','Loja','Los Ríos','Manabí','Morona Santiago','Napo','Orellana','Pastaza','Pichincha','Santa Elena','Santo Domingo de los Tsáchilas','Sucumbíos','Tungurahua','Zamora Chinchipe','Trabajo fuera de Ecuador'];
+const NIVELES=['Inicial','Preparatoria','Básica Elemental','Básica Media','Básica Superior','Bachillerato General Unificado','Bachillerato Técnico'];
+$('p-prov').innerHTML='<option value="">Selecciona</option>'+PROVINCIAS.map(x=>`<option>${x}</option>`).join('');
+$('p-niveles').innerHTML=NIVELES.map(x=>`<label><input type="checkbox" value="${x}">${x}</label>`).join('');
+$('p-nac').addEventListener('change',()=>{$('p-nac-otra').style.display=$('p-nac').value==='otra'?'block':'none';});
+function abrirPerfil(){
+  const u=USR,p=(u&&u.perfil)||{};
+  $('main').classList.add('oculto');$('perfil-box').classList.add('show');
+  $('p-nombre').value=u.nombre||'';
+  if(p.nacionalidad){const op=[...$('p-nac').options].some(o=>o.value===p.nacionalidad);$('p-nac').value=op?p.nacionalidad:'otra';$('p-nac-otra').value=op?'':p.nacionalidad;$('p-nac-otra').style.display=op?'none':'block';}
+  if(p.provincia)$('p-prov').value=p.provincia;
+  if(p.tipo_institucion)$('p-tipo').value=p.tipo_institucion;
+  if(p.experiencia!=null)$('p-exp').value=p.experiencia;
+  document.querySelectorAll('#p-niveles input').forEach(c=>{c.checked=(p.niveles||[]).includes(c.value);});
+  $('p-grados').value=p.grados||'';$('p-areas').value=p.areas||'';
+  if(p.titulo)$('p-titulo').value=p.titulo;if(p.estudia)$('p-estudia').value=p.estudia;if(p.dispositivos)$('p-disp').value=p.dispositivos;
+  $('p-acepta-box').style.display=u.consent_ok?'none':'flex';
+  window.scrollTo({top:0});
+}
+async function guardarPerfil(){
+  const nac=$('p-nac').value==='otra'?val('p-nac-otra'):$('p-nac').value;
+  const perfil={nacionalidad:nac,provincia:$('p-prov').value,tipo_institucion:$('p-tipo').value,experiencia:val('p-exp'),
+    niveles:[...document.querySelectorAll('#p-niveles input:checked')].map(c=>c.value),grados:val('p-grados'),areas:val('p-areas'),
+    titulo:$('p-titulo').value,estudia:$('p-estudia').value,dispositivos:$('p-disp').value};
+  const vacio=!val('p-nombre')||Object.entries(perfil).some(([k,v])=>Array.isArray(v)?!v.length:String(v).trim()==='');
+  if(vacio){accMsg('Completa todos los campos marcados con asterisco.','err','perfil-msg');return;}
+  if(!USR.consent_ok&&!$('p-acepta').checked){accMsg('Marca la casilla de autorización para continuar.','err','perfil-msg');return;}
+  const b=$('btn-perfil');b.disabled=true;accMsg('','', 'perfil-msg');
+  try{const j=await cuentaApi({accion:'perfil',token:tk(),nombre:val('p-nombre'),perfil,acepta:$('p-acepta').checked});USR=j.usuario;pintarUsuario();window.scrollTo({top:0});}
+  catch(e){if(e.status===401){setTk('');USR=null;pintarUsuario();}accMsg(e.message,'err','perfil-msg');}
+  b.disabled=false;
+}
 let paypalCargado=false;
 function cerrarPago(){$('pay-modal').classList.remove('show');}
 function abrirPago(){
@@ -609,10 +718,18 @@ function abrirPago(){
 }
 iniciarSesion();
 
-const VAL_HTML='<span class="val-q">¿Te sirve esta planificación para tu clase?</span><button class="val-btn" onclick="valorar(\'lista para usar\')">Sí, la usaría tal cual</button><button class="val-btn" onclick="valorar(\'necesita ajustes\')">Sí, con ajustes</button><button class="val-btn" onclick="valorar(\'no me sirve\')">No me sirve</button>';
+const VAL_HTML='<span class="val-q">¿Te sirve esta planificación para tu clase?</span><div class="val-row" data-k="sirvio">'+['La usaría tal cual','Me sirve con ajustes','No me sirve'].map(x=>`<button class="val-btn">${x}</button>`).join('')+'</div>'
+  +'<span class="val-q" style="margin-top:.6rem">¿Cuánto tendrías que modificarla para usarla?</span><div class="val-row" data-k="modificacion">'+['Nada','Poco','Bastante','Tendría que rehacerla'].map(x=>`<button class="val-btn">${x}</button>`).join('')+'</div><span class="val-q" id="val-gracias" style="font-weight:500;color:var(--green-dk)"></span>';
+$('val-box').addEventListener('click',e=>{
+  const bt=e.target.closest('.val-btn'),row=e.target.closest('.val-row');if(!bt||!row)return;
+  row.querySelectorAll('.val-btn').forEach(x=>x.classList.remove('on'));bt.classList.add('on');
+  cuentaApi({accion:'valorar',token:tk(),plan_id:planId,[row.dataset.k]:bt.textContent}).catch(()=>{});
+  if($('val-box').querySelectorAll('.val-btn.on').length===2)$('val-gracias').textContent='Gracias. Tus respuestas ayudan a mejorar PLANIA.';
+});
 function getAnon(){try{let a=localStorage.getItem('plania_anon_v1');if(!a){a=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now()+'-'+Math.random().toString(16).slice(2);localStorage.setItem('plania_anon_v1',a);}return a;}catch(e){return '';}}
 function enviarEvento(tipo,valor){fetch('/.netlify/functions/evento',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo,valor:valor||'',plan_id:planId,anon_id:getAnon()})}).catch(()=>{});}
-function valorar(v){enviarEvento('valoracion',v);$('val-box').innerHTML='<span class="val-q">Gracias. Tu respuesta ayuda a mejorar PLANIA.</span>';}
+$('dig-grid').addEventListener('click',e=>{const bt=e.target.closest('.seq-btn');if(!bt)return;document.querySelectorAll('#dig-grid .seq-btn').forEach(b=>b.classList.remove('on'));bt.classList.add('on');});
+function getDig(){const a=document.querySelector('#dig-grid .seq-btn.on');return a?a.dataset.d:'';}
 
 function selSeq(btn){document.querySelectorAll('.seq-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function getSeq(){const a=document.querySelector('.seq-btn.on');return a?a.dataset.seq:'ERCA';}
@@ -636,6 +753,7 @@ function subKey(){return SUBKEY[$('subnivel').value]||'';}
 function enMapa(){const k=subKey();return !!(MAPA&&k&&MAPA.m[k]&&MAPA.m[k][$('asignatura').value]);}
 function alCambiarSubnivel(){
   const k=subKey(),sel=$('asignatura'),prev=sel.value;
+  SEC=[];if(typeof pintarSecundarias==='function')pintarSecundarias();
   if(MAPA&&k){sel.innerHTML='<option value="">Selecciona la asignatura</option>'+Object.keys(MAPA.m[k]).map(a=>`<option>${esc(a)}</option>`).join('')+`<option>${OTRA}</option>`;}
   else sel.innerHTML=ASIG_BASE;
   if([...sel.options].some(o=>o.value===prev))sel.value=prev;
@@ -643,6 +761,7 @@ function alCambiarSubnivel(){
 }
 function alCambiarAsignatura(){
   limpiarSeleccion(true);
+  if(!enMapa()){SEC=[];pintarSecundarias();}
   $('buscar').value='';
   aplicarModo();
   if(enMapa())filtrar();
@@ -654,6 +773,7 @@ function aplicarModo(){
   $('s-mapa').style.display=m?'block':'none';
   $('s-comp').style.display=m?'none':'block';
   $('s-ins').style.display=m?'none':'block';
+  $('s-sec').style.display=m?'block':'none';
   $('destreza').readOnly=m;
   $('destreza').placeholder=m?'Elige la destreza en el buscador de arriba':'Escribe la destreza exactamente como aparece en el currículo MINEDUC...';
 }
@@ -666,7 +786,7 @@ function filtrar(){
 }
 function limpiarSeleccion(borrar){
   if(mapaSel||borrar&&$('destreza').readOnly){$('destreza').value='';$('indicador').value='';}
-  mapaSel=null;$('ind-hint').textContent='';
+  mapaSel=null;$('ind-hint').textContent='';$('sel-ind').style.display='none';
   $('mapa-info').innerHTML='Elige una destreza para ver sus competencias e inserciones curriculares.';
 }
 function elegirDestreza(){
@@ -674,9 +794,17 @@ function elegirDestreza(){
   if(i===''){limpiarSeleccion(false);return;}
   const e=mapaLista[+i];mapaSel=e;
   $('destreza').value=e.c+'. '+e.t;
-  const ind=MAPA.ind[e.i]||'';
-  $('indicador').value=ind;
-  $('ind-hint').textContent=ind.includes('\n')?'El currículo trae varios indicadores para el criterio de esta destreza. Deja solo el que vas a evaluar en esta clase.':'Indicador del currículo priorizado. Puedes ajustarlo a tu clase.';
+  const inds=(MAPA.ind[e.i]||'').split('\n').map(x=>x.trim()).filter(Boolean);
+  const si=$('sel-ind');
+  if(inds.length>1){
+    si.innerHTML='<option value="">Elige el indicador que vas a evaluar en esta clase</option>'+inds.map((x,j)=>`<option value="${j}">${esc(x.length>170?x.slice(0,170)+'…':x)}</option>`).join('');
+    si.style.display='block';si.onchange=()=>{$('indicador').value=si.value===''?'':inds[+si.value];};
+    $('indicador').value='';
+    $('ind-hint').textContent='El criterio de esta destreza tiene '+inds.length+' indicadores. Elige el más acorde a tu clase. PLANIA sugerirá además su desagregación según las actividades planificadas.';
+  }else{
+    si.style.display='none';$('indicador').value=inds[0]||'';
+    $('ind-hint').textContent='Indicador del currículo priorizado. PLANIA sugerirá su desagregación según las actividades planificadas.';
+  }
   const comps=[...e.k].map(c=>COMPK[c][1]);
   $('mapa-info').innerHTML=`<div class="mc"><b>Competencias:</b> ${comps.length?esc(comps.join(', ')):'El currículo no marca una competencia específica en esta destreza.'}</div>`
     +(e.n.length?e.n.map(x=>`<div class="mi"><b>${esc(TIPO[x[0]][1])}:</b> ${esc(x[1])}</div>`).join(''):'<div class="mi">El currículo no marca inserciones curriculares en esta destreza.</div>');
@@ -685,6 +813,43 @@ $('subnivel').addEventListener('change',alCambiarSubnivel);
 $('asignatura').addEventListener('change',alCambiarAsignatura);
 $('buscar').addEventListener('input',()=>{if(enMapa()){filtrar();}});
 $('sel-destreza').addEventListener('change',elegirDestreza);
+
+// ---------- DESTREZAS SECUNDARIAS (hasta dos) ----------
+let SEC=[];   // cada una: {asig, q, lista, sel}
+function agregarSecundaria(){if(SEC.length>=2||!enMapa())return;SEC.push({asig:'',q:'',sel:null});pintarSecundarias();}
+function quitarSecundaria(i){SEC.splice(i,1);pintarSecundarias();}
+function pintarSecundarias(){
+  const k=subKey(),box=$('sec-slots');
+  if(!box)return;
+  box.innerHTML=SEC.map((x,i)=>{
+    const asigs=MAPA&&k&&MAPA.m[k]?Object.keys(MAPA.m[k]):[];
+    return `<div class="sec-slot" data-i="${i}"><div class="sec-head"><span>Destreza secundaria ${i+1}</span><a onclick="quitarSecundaria(${i})">Quitar</a></div>
+      <select class="sec-asig"><option value="">Asignatura</option>${asigs.map(a=>`<option${a===x.asig?' selected':''}>${esc(a)}</option>`).join('')}</select>
+      <input type="text" class="sec-q" placeholder="Busca por tema, palabra o código" value="${esc(x.q)}" ${x.asig?'':'disabled'}>
+      <select class="sec-sel" ${x.asig?'':'disabled'}></select></div>`;
+  }).join('');
+  SEC.forEach((x,i)=>llenarSec(i));
+  $('btn-sec').style.display=SEC.length>=2?'none':'inline-block';
+}
+function listaSec(i){
+  const x=SEC[i],k=subKey(),base=(MAPA&&MAPA.m[k]&&MAPA.m[k][x.asig])||[];
+  const q=plano(x.q).split(/\s+/).filter(Boolean);
+  return base.filter(e=>(!mapaSel||e.c!==mapaSel.c)&&q.every(w=>plano(e.c+' '+e.t+' '+e.n.map(y=>y[1]).join(' ')).includes(w)));
+}
+function llenarSec(i){
+  const slot=document.querySelector(`.sec-slot[data-i="${i}"]`);if(!slot)return;
+  const x=SEC[i],l=listaSec(i);x.lista=l;
+  const sel=slot.querySelector('.sec-sel');
+  sel.innerHTML=`<option value="">Selecciona la destreza (${l.length})</option>`+l.map((e,j)=>`<option value="${j}"${x.sel&&x.sel.c===e.c?' selected':''}>${esc(e.c)}. ${esc(e.t.length>140?e.t.slice(0,140)+'…':e.t)}</option>`).join('');
+}
+$('sec-slots').addEventListener('change',e=>{
+  const slot=e.target.closest('.sec-slot');if(!slot)return;const i=+slot.dataset.i,x=SEC[i];
+  if(e.target.classList.contains('sec-asig')){x.asig=e.target.value;x.q='';x.sel=null;pintarSecundarias();}
+  if(e.target.classList.contains('sec-sel')){x.sel=e.target.value===''?null:x.lista[+e.target.value];}
+});
+$('sec-slots').addEventListener('input',e=>{
+  if(!e.target.classList.contains('sec-q'))return;const i=+e.target.closest('.sec-slot').dataset.i;SEC[i].q=e.target.value;llenarSec(i);
+});
 
 async function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 function setStep(n,msg){
@@ -707,21 +872,26 @@ function tablaHTML(d,plan){
   const c=(t,n)=>`<td colspan="${n}">${t}</td>`;
   const marca=(lista,[clave,rot],n)=>`<td class="h" colspan="${n}">${rot}${lista.includes(clave)?'<br><span class="x">X</span>':''}</td>`;
   const etapas=d.secuencia==='ACC'?ETAPAS_ACC:ETAPAS_ERCA;
-  const acts=etapas.map(([nombre,sub])=>{
+  const acts=etapas.map(([nombre,sub],ix)=>{
     const k=nombre.toLowerCase();
     const k2=k.normalize('NFD').replace(/[̀-ͯ]/g,'');
     const e=(plan.etapas&&(plan.etapas[k]||plan.etapas[k2]))||{};
     const pasos=Array.isArray(e.pasos)&&e.pasos.length?`<ol>${e.pasos.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:`<p>${esc(e.actividad)}</p>`;
+    const sit=ix===0&&plan.situacion_aprendizaje?`<p class="sit-box"><b>Situación de aprendizaje:</b> ${esc(plan.situacion_aprendizaje)}</p>`:'';
     return `<p><b>${nombre.toUpperCase()}${e.nombre?': '+esc(e.nombre):''}</b>${e.tiempo?' ('+esc(e.tiempo)+')':''}</p>
 <p><i>Nivel de Marzano: ${esc(e.nivel_marzano||sub)}</i></p>
-${pasos}
-${e.insercion?`<p><i>Inserción curricular: ${esc(e.insercion)}</i></p>`:''}
+${sit}${pasos}
 <p><b>DUA P1. Representación:</b> ${esc(e.representacion)}</p>
 <p><b>DUA P2. Acción y expresión:</b> ${esc(e.accion)}</p>
 <p><b>DUA P3. Compromiso:</b> ${esc(e.implicacion)}</p>`;
-  }).join('');
+  }).join('')+(plan.tarea_casa&&plan.tarea_casa.consigna?`<p><b>TAREA PARA CASA</b></p><p>${esc(plan.tarea_casa.consigna)}${plan.tarea_casa.herramienta?' <i>Herramienta sugerida: '+esc(plan.tarea_casa.herramienta)+'.</i>':''}</p>`:'')
+    +'<p style="font-size:10px;color:#555"><i>Siglas de competencias: (CC) comunicacional, (CM) matemática, (CD) digital, (CS) socioemocional.</i></p>';
   const recs=Array.isArray(plan.recursos)?plan.recursos.map(r=>`<p><b>${esc(r.nombre)}</b>${r.detalle?': '+esc(r.detalle):''}${r.busqueda?`<br><a href="https://www.google.com/search?q=${encodeURIComponent(r.busqueda)}" target="_blank" rel="noopener">Buscar material de apoyo</a>`:''}</p>`).join(''):esc(plan.recursos);
-  const ejes=Array.isArray(plan.ejes_transversales)?plan.ejes_transversales.filter(x=>x&&(x.insercion||x.contenido)).map(x=>`<p><b>${esc(x.insercion)}:</b> ${esc(x.contenido)}</p>`).join(''):esc(plan.ejes_transversales);
+  const ejes=Array.isArray(plan.ejes_transversales)?plan.ejes_transversales.filter(x=>x&&(x.insercion||x.contenido)).map(x=>`<p><b>${esc(x.insercion)}:</b> ${esc(x.contenido)}${x.secundaria?` <i>(destreza secundaria${typeof x.secundaria==='string'?' '+esc(x.secundaria):''})</i>`:''}</p>`).join(''):esc(plan.ejes_transversales);
+  const secs=Array.isArray(plan.secundarias)&&plan.secundarias.length?'<p style="margin-top:6px"><b>Destrezas que se transversalizan:</b></p>'+plan.secundarias.map(x=>{const t=(plan.destrezas_transversales||[]).find(y=>y&&y.codigo===x.codigo);return `<p>${esc(x.destreza)}${x.asignatura?' <i>('+esc(x.asignatura)+')</i>':''}${t&&t.integracion?'<br><i>Se trabaja en: '+esc(t.integracion)+'</i>':''}</p>`;}).join(''):'';
+  const indDes=plan.indicador_desagregado?`<p style="margin-top:6px"><b>Indicador desagregado para esta clase (sugerido por PLANIA):</b> ${esc(plan.indicador_desagregado)}</p>`:'';
+  const compMarca=Array.isArray(plan.competencias_plan)?plan.competencias_plan:d.competencias;
+  const insMarca=d.ins_marca||d.inserciones;
   const desag=plan.destreza_desagregada&&plan.destreza_desagregada.trim()!==d.destreza.trim()?`<p style="margin-top:6px"><b>Destreza desagregada para esta clase${plan.desagregacion_origen==='plania'?' (propuesta por PLANIA)':''}:</b> ${esc(plan.destreza_desagregada)}</p>`:'';
   const aj=Array.isArray(plan.ajustes_razonables)?plan.ajustes_razonables:[];
   const filasAj=(aj.length?aj:[{}]).map(a=>`<tr>${c('',2)}${c(esc(a.motivo),3)}${c(esc(a.actividad),3)}${c(esc(a.ajuste),4)}</tr>`).join('');
@@ -732,14 +902,14 @@ ${e.insercion?`<p><i>Inserción curricular: ${esc(e.insercion)}</i></p>`:''}
 <tr>${h('Nombre del Docente',2)}${c(esc(d.docente),2)}${h('Área',1)}${c(esc(d.area),1)}${h('Asignatura',2)}${c(esc(d.asignatura),2)}${h('Periodo Lectivo',1)}${c(esc(d.periodo_lectivo),1)}</tr>
 <tr>${h('# de Unidad',2)}${h('Título de la Unidad',2)}${h('Grado/Curso',2)}${h('Paralelo',2)}${h('Fecha de Inicio',2)}${h('Fecha de Finalización',2)}</tr>
 <tr>${c(esc(d.unidad),2)}${c(esc(d.titulo_unidad),2)}${c(esc(d.grado),2)}${c(esc(d.paralelo),2)}${c(fechaEC(d.fecha_inicio),2)}${c(fechaEC(d.fecha_fin),2)}</tr>
-<tr>${h('COMPETENCIAS',4)}${COMPS.map(x=>marca(d.competencias,x,2)).join('')}</tr>
-<tr>${INSER.map(x=>marca(d.inserciones,x,2)).join('')}</tr>
+<tr>${h('COMPETENCIAS',4)}${COMPS.map(x=>marca(compMarca,x,2)).join('')}</tr>
+<tr>${INSER.map(x=>marca(insMarca,x,2)).join('')}</tr>
 <tr>${h('DISEÑO UNIVERSAL PARA EL APRENDIZAJE',3)}${h('P1. MÚLTIPLES FORMAS DE REPRESENTACIÓN',3)}${h('P2. MÚLTIPLES FORMAS DE ACCIÓN Y EXPRESIÓN',3)}${h('P3. MÚLTIPLES FORMAS DE COMPROMISO',3)}</tr>
 <tr>${h('Ejes Transversales',3)}${c(ejes,9)}</tr>
 <tr>${h('Tema',3)}${c(esc(plan.tema||d.tema),9)}</tr>
 <tr>${h('Objetivo',3)}${c(esc(plan.objetivo),9)}</tr>
 <tr>${h('Destreza con criterio de desempeño',6)}${h('Indicador de evaluación',6)}</tr>
-<tr>${c('<p>'+esc(d.destreza)+'</p>'+desag,6)}${c(esc(d.indicador).replace(/\n/g,'<br>'),6)}</tr>
+<tr>${c('<p>'+esc(d.destreza)+'</p>'+desag+secs,6)}${c('<p>'+esc(d.indicador).replace(/\n/g,'<br>')+'</p>'+indDes,6)}</tr>
 <tr>${h('PLANIFICACIÓN',12)}</tr>
 <tr>${h('ORIENTACIONES METODOLÓGICAS PARA LA ENSEÑANZA Y APRENDIZAJE',6)}${h('RECURSOS',3)}${h('ORIENTACIONES PARA LA EVALUACIÓN',3)}</tr>
 <tr>${c(acts,6)}${c(recs,3)}${c(`<p><b>Técnica:</b> ${esc(plan.tecnica)}</p><p><b>Instrumento de evaluación:</b> ${esc(plan.instrumento)}</p>`,3)}</tr>
@@ -764,7 +934,7 @@ function rubricaHTML(d,plan){
 <tr>${h('RÚBRICA DE EVALUACIÓN',12)}</tr>
 <tr>${h('Tema',2)}${c(esc(plan.tema||d.tema),3)}${h('Asignatura',2)}${c(esc(d.asignatura),2)}${h('Grado/Curso',2)}${c(esc(d.grado),1)}</tr>
 <tr>${h('Estudiante',2)}${c('',6)}${h('Fecha',2)}${c('',2)}</tr>
-<tr>${h('Indicador de evaluación',2)}${c(esc(d.indicador).replace(/\n/g,'<br>'),10)}</tr>
+<tr>${h('Indicador de evaluación',2)}${c(esc(plan.indicador_desagregado||d.indicador).replace(/\n/g,'<br>'),10)}</tr>
 <tr>${h('Criterio',2)}${h('Domina los aprendizajes requeridos (9 a 10)',3)}${h('Alcanza los aprendizajes requeridos (7 a 8,99)',2)}${h('Próximo a alcanzar los aprendizajes requeridos (4,01 a 6,99)',2)}${h('No alcanza los aprendizajes requeridos (4 o menos)',2)}${h('Puntaje',1)}</tr>
 ${rub.map(r=>`<tr>${c('<b>'+esc(r.criterio)+'</b>',2)}${c(esc(r.dar),3)}${c(esc(r.aar),2)}${c(esc(r.paar),2)}${c(esc(r.naar),2)}${c('',1)}</tr>`).join('')}
 <tr>${h('Calificación final (promedio de los criterios)',11)}${c('',1)}</tr>
@@ -787,7 +957,11 @@ async function generar(){
     d.inserciones=mapaSel.n.map(x=>TIPO[x[0]][0]);
     d.ejes=mapaSel.n.map(x=>({insercion:TIPO[x[0]][1],contenido:x[1]}));
     d.codigo=mapaSel.c;d.criterio=mapaSel.r;d.origen_destreza='mapa';
-  }else d.origen_destreza='manual';
+    d.secundarias=SEC.filter(x=>x.sel).map(x=>({codigo:x.sel.c,asignatura:x.asig,destreza:x.sel.c+'. '+x.sel.t,
+      competencias:[...x.sel.k].map(c=>COMPK[c][0]),ejes:x.sel.n.map(y=>({insercion:TIPO[y[0]][1],contenido:y[1]}))}));
+  }else{d.origen_destreza='manual';d.secundarias=[];}
+  d.digitales=getDig();d.preferencias=val('preferencias');
+  d.ins_marca=[...new Set([...d.inserciones,...(enMapa()&&mapaSel?SEC.filter(x=>x.sel).flatMap(x=>x.sel.n.map(y=>TIPO[y[0]][0])):[])])];
   const [periodos,minutos]=$('periodos').value.split('|');
   const errEl=$('err-msg');
   errEl.classList.remove('show');
@@ -800,6 +974,11 @@ async function generar(){
     errEl.textContent='Completa los campos obligatorios: subnivel, asignatura, grado, destreza e indicador.';
     errEl.classList.add('show');return;
   }
+  if($('sel-ind').style.display!=='none'&&$('sel-ind').value===''){
+    errEl.textContent='Elige el indicador que vas a evaluar en esta clase.';errEl.classList.add('show');return;
+  }
+  if(!d.digitales){errEl.textContent='Indica si quieres actividades con herramientas digitales.';errEl.classList.add('show');$('s-dig').scrollIntoView({behavior:'smooth'});return;}
+  if(SEC.some(x=>!x.sel)){errEl.textContent='Elige la destreza secundaria o quita el espacio vacío.';errEl.classList.add('show');return;}
   if(!d.tema) d.tema=d.destreza.split('.')[0].trim().substring(0,55);
 
   const btn=$('btn-gen');
@@ -816,6 +995,7 @@ async function generar(){
     const resp=await fetch('/.netlify/functions/planificar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(envio)});
     const data=await resp.json();
     if(resp.status===401){setTk('');USR=null;pintarUsuario();throw new Error(data.error);}
+    if(resp.status===428){USR=data.usuario||USR;if(USR)USR.perfil_completo=false;pintarUsuario();throw new Error(data.error);}
     if(resp.status===402){USR=data.usuario||USR;pintarUsuario();abrirPago();throw new Error('Ya usaste tus planificaciones gratuitas. Suscríbete para seguir generando.');}
     if(!resp.ok||data.error) throw new Error(data.error||'Error del servidor');
     if(data.usuario){USR=data.usuario;pintarUsuario();}
