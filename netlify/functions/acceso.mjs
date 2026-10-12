@@ -277,6 +277,27 @@ export default async (req) => {
       return out(200, { ok: true });
     }
 
+    // Historial del docente: lo ve siempre, tenga o no suscripción.
+    if (accion === "mis_planes") {
+      const { blobs } = await store.list({ prefix: "h/" + u.email + "/" });
+      const ult = blobs.map((x) => x.key).sort().reverse().slice(0, 60);
+      const regs = await Promise.all(ult.map((k) => store.get(k, { type: "json" }).catch(() => null)));
+      const planes = regs.filter(Boolean).map((h) => {
+        const d = h.datos || {}, p = h.plan || {};
+        return { plan_id: h.plan_id, fecha: h.fecha, subnivel: d.subnivel || "", asignatura: d.asignatura || "", grado: d.grado || "",
+          codigo: d.codigo || "", tema: p.tema || d.tema || "", secuencia: d.secuencia || "", valoracion: h.valoracion || null };
+      });
+      return out(200, { planes, total: blobs.length });
+    }
+    if (accion === "mi_plan") {
+      const id = txt(b.plan_id, 60);
+      const ref = await store.get("pi/" + id, { type: "json" });
+      if (!ref || ref.email !== u.email) return out(404, { error: "No encontramos esa planificación en tu cuenta." });
+      const h = await store.get(ref.clave, { type: "json" });
+      if (!h) return out(404, { error: "No encontramos esa planificación en tu cuenta." });
+      return out(200, { registro: h });
+    }
+
     if (accion === "sugerir") {
       const t = txt(b.texto, 1500);
       if (!t) return out(400, { error: "Escribe tu sugerencia." });
