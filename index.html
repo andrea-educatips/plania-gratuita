@@ -474,6 +474,21 @@ textarea[readonly]{background:var(--gray)}
   </div>
 </div>
 
+<!-- INICIO DE LA CLASE -->
+<div class="card" id="s-inicio">
+  <div class="card-hdr"><div class="card-icon ic-b">🚀</div><div><div class="card-title">¿Cómo quieres iniciar la clase? <span class="req">*</span></div><div class="card-sub">El inicio conecta lo que tus estudiantes ya saben con el nuevo aprendizaje</div></div></div>
+  <div class="card-body">
+    <div class="metod-grid" id="inicio-grid">
+      <button class="mb" data-i="situacion">📖 Situación de aprendizaje</button>
+      <button class="mb" data-i="juego">🎲 Juego</button>
+      <button class="mb" data-i="lectura">📚 Lectura</button>
+      <button class="mb" data-i="experimento">🧪 Experimento</button>
+      <button class="mb" data-i="plania">✦ Que PLANIA decida</button>
+    </div>
+    <span class="hint" id="inicio-nota" style="display:none;margin-top:.5rem">En aula invertida la clase inicia con el trabajo previo que los estudiantes hacen en casa, así que no necesitas elegir el inicio.</span>
+  </div>
+</div>
+
 <!-- LO QUE MARCA EL CURRÍCULO -->
 <div class="card" id="s-mapa" style="display:none">
   <div class="card-hdr"><div class="card-icon ic-b">🔗</div><div><div class="card-title">Competencias e inserciones de esta destreza</div><div class="card-sub">Las define el currículo priorizado con énfasis en competencias. Se aplican de forma automática</div></div></div>
@@ -733,8 +748,11 @@ function getDig(){const a=document.querySelector('#dig-grid .seq-btn.on');return
 
 function selSeq(btn){document.querySelectorAll('.seq-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 function getSeq(){const a=document.querySelector('.seq-btn.on');return a?a.dataset.seq:'ERCA';}
-$('metod-grid').addEventListener('click',e=>{if(!e.target.classList.contains('mb'))return;document.querySelectorAll('.mb').forEach(b=>b.classList.remove('on'));e.target.classList.add('on');});
-function getMetod(){const a=document.querySelector('.mb.on');return a?a.dataset.m:'';}
+$('metod-grid').addEventListener('click',e=>{if(!e.target.classList.contains('mb'))return;document.querySelectorAll('#metod-grid .mb').forEach(b=>b.classList.remove('on'));e.target.classList.add('on');actualizarInicio();});
+$('inicio-grid').addEventListener('click',e=>{const b=e.target.closest('.mb');if(!b||$('inicio-grid').classList.contains('bloq'))return;document.querySelectorAll('#inicio-grid .mb').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+function actualizarInicio(){const inv=getMetod()==='Aula invertida';$('inicio-grid').classList.toggle('bloq',inv);$('inicio-grid').style.opacity=inv?'.4':'1';$('inicio-grid').style.pointerEvents=inv?'none':'auto';$('inicio-nota').style.display=inv?'block':'none';}
+function getInicio(){if(getMetod()==='Aula invertida')return 'invertida';const a=document.querySelector('#inicio-grid .mb.on');return a?a.dataset.i:'';}
+function getMetod(){const a=document.querySelector('#metod-grid .mb.on');return a?a.dataset.m:'';}
 $('comp-grid').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;c.classList.toggle('on-p');});
 $('ins-grid').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;c.classList.toggle('on-b');});
 function getComps(){return[...document.querySelectorAll('#comp-grid .chip.on-p')].map(e=>e.dataset.v);}
@@ -877,17 +895,20 @@ function tablaHTML(d,plan){
     const k2=k.normalize('NFD').replace(/[̀-ͯ]/g,'');
     const e=(plan.etapas&&(plan.etapas[k]||plan.etapas[k2]))||{};
     const pasos=Array.isArray(e.pasos)&&e.pasos.length?`<ol>${e.pasos.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:`<p>${esc(e.actividad)}</p>`;
-    const sit=ix===0&&plan.situacion_aprendizaje?`<p class="sit-box"><b>Situación de aprendizaje:</b> ${esc(plan.situacion_aprendizaje)}</p>`:'';
+    const iniTxt=plan.inicio_texto||plan.situacion_aprendizaje;
+    const sit=ix===0&&iniTxt?`<p class="sit-box"><b>${esc(plan.inicio_tipo||'Situación de aprendizaje')}:</b> ${esc(iniTxt).replace(/\n/g,'<br>')}</p>`:'';
+    const etPreg=d.secuencia==='ACC'?0:1;
+    const preg=ix===etPreg&&Array.isArray(plan.preguntas_reflexion)&&plan.preguntas_reflexion.length?`<p><b>Preguntas:</b></p><ol>${plan.preguntas_reflexion.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:'';
     return `<p><b>${nombre.toUpperCase()}${e.nombre?': '+esc(e.nombre):''}</b>${e.tiempo?' ('+esc(e.tiempo)+')':''}</p>
 <p><i>Nivel de Marzano: ${esc(e.nivel_marzano||sub)}</i></p>
 ${sit}${pasos}
-${Array.isArray(e.preguntas)&&e.preguntas.length?`<p><b>Preguntas para esta etapa:</b></p><ol>${e.preguntas.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
+${preg}
 ${e.material?`<p class="sit-box" style="background:#fef8e7;border-color:#b8860b"><b>Material para el docente:</b><br>${esc(e.material).replace(/\n/g,'<br>')}</p>`:''}
 <p><b>DUA P1. Representación:</b> ${esc(e.representacion)}</p>
 <p><b>DUA P2. Acción y expresión:</b> ${esc(e.accion)}</p>
 <p><b>DUA P3. Compromiso:</b> ${esc(e.implicacion)}</p>`;
   }).join('')+(plan.tarea_casa&&plan.tarea_casa.consigna?`<p><b>TAREA PARA CASA</b></p><p>${esc(plan.tarea_casa.consigna)}${plan.tarea_casa.herramienta?' <i>Herramienta sugerida: '+esc(plan.tarea_casa.herramienta)+'.</i>':''}</p>`:'')
-    +'<p style="font-size:10px;color:#555"><i>Siglas de competencias: (CC) comunicacional, (CM) matemática, (CD) digital, (CS) socioemocional.</i></p>';
+    +'<p style="font-size:10px;color:#555"><i>Siglas de competencias: (CC) comunicacional, (CM) matemática, (CD) digital, (CS) socioemocional. Siglas de inserciones: (ES) Socioemocional, (EDS) Desarrollo Sostenible, (ESV) Seguridad Vial, (ECEI) Cívica, Ética e Integridad, (ESI) Seguridad Integral, (EF) Financiera.</i></p>';
   const recs=Array.isArray(plan.recursos)?plan.recursos.map(r=>`<p><b>${esc(r.nombre)}</b>${r.detalle?': '+esc(r.detalle):''}${r.busqueda?`<br><a href="https://www.google.com/search?q=${encodeURIComponent(r.busqueda)}" target="_blank" rel="noopener">Buscar material de apoyo</a>`:''}</p>`).join(''):esc(plan.recursos);
   const ejes=Array.isArray(plan.ejes_transversales)?plan.ejes_transversales.filter(x=>x&&(x.insercion||x.contenido)).map(x=>`<p><b>${esc(x.insercion)}:</b> ${esc(x.contenido)}${x.secundaria?` <i>(destreza secundaria${typeof x.secundaria==='string'?' '+esc(x.secundaria):''})</i>`:''}</p>`).join(''):esc(plan.ejes_transversales);
   const secs=Array.isArray(plan.secundarias)&&plan.secundarias.length?'<p style="margin-top:6px"><b>Destrezas que se transversalizan:</b></p>'+plan.secundarias.map(x=>{const t=(plan.destrezas_transversales||[]).find(y=>y&&y.codigo===x.codigo);return `<p>${esc(x.destreza)}${x.asignatura?' <i>('+esc(x.asignatura)+')</i>':''}${t&&t.integracion?'<br><i>Se trabaja en: '+esc(t.integracion)+'</i>':''}</p>`;}).join(''):'';
@@ -962,7 +983,7 @@ async function generar(){
     d.secundarias=SEC.filter(x=>x.sel).map(x=>({codigo:x.sel.c,asignatura:x.asig,destreza:x.sel.c+'. '+x.sel.t,
       competencias:[...x.sel.k].map(c=>COMPK[c][0]),ejes:x.sel.n.map(y=>({insercion:TIPO[y[0]][1],contenido:y[1]}))}));
   }else{d.origen_destreza='manual';d.secundarias=[];}
-  d.digitales=getDig();d.preferencias=val('preferencias');
+  d.digitales=getDig();d.preferencias=val('preferencias');d.inicio=getInicio();
   d.ins_marca=[...new Set([...d.inserciones,...(enMapa()&&mapaSel?SEC.filter(x=>x.sel).flatMap(x=>x.sel.n.map(y=>TIPO[y[0]][0])):[])])];
   const [periodos,minutos]=$('periodos').value.split('|');
   const errEl=$('err-msg');
@@ -979,6 +1000,7 @@ async function generar(){
   if($('sel-ind').style.display!=='none'&&$('sel-ind').value===''){
     errEl.textContent='Elige el indicador que vas a evaluar en esta clase.';errEl.classList.add('show');return;
   }
+  if(!d.inicio){errEl.textContent='Elige cómo quieres iniciar la clase.';errEl.classList.add('show');$('s-inicio').scrollIntoView({behavior:'smooth'});return;}
   if(!d.digitales){errEl.textContent='Indica si quieres actividades con herramientas digitales.';errEl.classList.add('show');$('s-dig').scrollIntoView({behavior:'smooth'});return;}
   if(SEC.some(x=>!x.sel)){errEl.textContent='Elige la destreza secundaria o quita el espacio vacío.';errEl.classList.add('show');return;}
   if(!d.tema) d.tema=d.destreza.split('.')[0].trim().substring(0,55);
