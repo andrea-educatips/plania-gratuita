@@ -1046,6 +1046,23 @@ $('sec-slots').addEventListener('input',e=>{
 });
 
 async function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+// La generación corre en segundo plano y el navegador consulta cada pocos segundos si ya terminó.
+async function generarEnFondo(envio){
+  const id=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12);
+  const r=await fetch('/.netlify/functions/planificar-background',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({},envio,{trabajo_id:id}))});
+  if(r.status!==202&&!r.ok)throw new Error('No pudimos iniciar la generación. Intenta de nuevo en un momento.');
+  const msgs=['Consultando a la IA...','Redactando las actividades...','Escribiendo el material para el docente...','Armando la rúbrica...','Revisando competencias e inserciones...','Ya casi está lista...'];
+  const t0=Date.now();
+  while(Date.now()-t0<240000){
+    await sleep(3000);
+    const seg=Math.floor((Date.now()-t0)/1000);
+    $('prog-msg').textContent=msgs[Math.min(msgs.length-1,Math.floor(seg/9))]+' ('+seg+' s)';
+    let j;
+    try{j=await cuentaApi({accion:'trabajo_ver',token:tk(),trabajo_id:id});}catch(e){if(e.status===401)return{status:401,data:{error:e.message}};continue;}
+    if(j&&j.pendiente===false){let data={};try{data=JSON.parse(j.body||'{}');}catch(e){data={error:'La respuesta llegó incompleta. Intenta de nuevo.'};}return{status:j.status,ok:j.status>=200&&j.status<300,data};}
+  }
+  throw new Error('La generación está tardando más de lo normal. Revisa en unos minutos la sección Mis planificaciones.');
+}
 function setStep(n,msg){
   $('prog-msg').textContent=msg;
   ['ps1','ps2','ps3','ps4'].forEach((id,i)=>{
@@ -1192,8 +1209,8 @@ async function generar(){
     // El nombre del docente, el paralelo y las fechas se usan solo en el documento. No se envían ni se guardan.
     const envio=Object.assign({},d,{periodos:`${periodos} período${periodos>1?'s':''}`,minutos:`${minutos} minutos`,anon_id:getAnon(),token:tk()});
     delete envio.docente;delete envio.paralelo;delete envio.fecha_inicio;delete envio.fecha_fin;
-    const resp=await fetch('/.netlify/functions/planificar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(envio)});
-    const data=await resp.json();
+    const resp=await generarEnFondo(envio);
+    const data=resp.data;
     if(resp.status===401){setTk('');USR=null;pintarUsuario();throw new Error(data.error);}
     if(resp.status===428){USR=data.usuario||USR;if(USR)USR.perfil_completo=false;pintarUsuario();throw new Error(data.error);}
     if(resp.status===402){USR=data.usuario||USR;pintarUsuario();abrirPago();throw new Error('Ya usaste tus planificaciones gratuitas. Suscríbete para seguir generando.');}
