@@ -881,6 +881,8 @@ function tablaHTML(d,plan){
     return `<p><b>${nombre.toUpperCase()}${e.nombre?': '+esc(e.nombre):''}</b>${e.tiempo?' ('+esc(e.tiempo)+')':''}</p>
 <p><i>Nivel de Marzano: ${esc(e.nivel_marzano||sub)}</i></p>
 ${sit}${pasos}
+${Array.isArray(e.preguntas)&&e.preguntas.length?`<p><b>Preguntas para esta etapa:</b></p><ol>${e.preguntas.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
+${e.material?`<p class="sit-box" style="background:#fef8e7;border-color:#b8860b"><b>Material para el docente:</b><br>${esc(e.material).replace(/\n/g,'<br>')}</p>`:''}
 <p><b>DUA P1. Representación:</b> ${esc(e.representacion)}</p>
 <p><b>DUA P2. Acción y expresión:</b> ${esc(e.accion)}</p>
 <p><b>DUA P3. Compromiso:</b> ${esc(e.implicacion)}</p>`;
@@ -1043,7 +1045,7 @@ function descargarWord(){
   const css='@page WordSection1{size:841.9pt 595.3pt;mso-page-orientation:landscape;margin:1.5cm}div.WordSection1{page:WordSection1}'
     +'body{font-family:Arial,sans-serif;font-size:9pt}table{border-collapse:collapse;width:100%}'
     +'td{border:1px solid #000;padding:4px 5px;vertical-align:top;font-family:Arial,sans-serif;font-size:9pt}'
-    +'td.h{background:#d9ead3;font-weight:bold;text-align:center;vertical-align:middle}p{margin:0 0 5pt 0}ol{margin:0 0 5pt 14pt;padding:0}.x{font-size:12pt}';
+    +'td.h{background:#d9ead3;font-weight:bold;text-align:center;vertical-align:middle}p{margin:0 0 5pt 0}ol{margin:0 0 5pt 14pt;padding:0}.x{font-size:12pt}.sit-box{background:#eef3ff;padding:3pt}';
   const doc='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Planificación</title>'
     +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
     +'<style>'+css+'</style></head><body><div class="WordSection1">'+tablaHTML(ult.d,ult.plan)+(rubricaHTML(ult.d,ult.plan)?'<br clear="all" style="page-break-before:always">'+rubricaHTML(ult.d,ult.plan):'')
