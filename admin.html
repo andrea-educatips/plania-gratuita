@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Panel PLANIA</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--green:#008000;--green-dk:#005c00;--green-lt:#e8f5e8;--purple:#951abe;--purple-lt:#f3e8fa;--purple-dk:#6a0f8a;--blue:#0000cc;--blue-lt:#e6efff;--gold:#b8860b;--gold-lt:#fef8e7;--red:#8a0000;--red-lt:#fde8e8;--gray:#f6f6f3;--gray2:#e8e7e2;--gray3:#c0bfba;--text:#18180f;--text2:#52524a;--text3:#8a8a80;--white:#fff;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--gray);color:var(--text);min-height:100vh}
+.hdr{background:var(--white);border-bottom:1px solid var(--gray2);padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;min-height:60px;flex-wrap:wrap;gap:8px}
+.logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--green);text-decoration:none}
+.logo small{font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text3);margin-left:6px}
+.hdr a.vol{font-size:13px;color:var(--purple)}
+.wrap{max-width:1200px;margin:1.5rem auto;padding:0 1rem;display:flex;flex-direction:column;gap:1rem}
+.card{background:var(--white);border:1px solid var(--gray2);border-radius:var(--r);padding:1rem 1.1rem}
+h2{font-size:15px;margin-bottom:.7rem}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem}
+.tile{background:var(--white);border:1px solid var(--gray2);border-radius:var(--r);padding:.9rem 1rem}
+.tile b{display:block;font-size:26px;color:var(--green);font-weight:600}
+.tile span{font-size:12px;color:var(--text2)}
+.row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end}
+.row label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--text2)}
+input,select{font-family:inherit;font-size:13px;border:1.5px solid var(--gray3);border-radius:8px;padding:8px 10px;background:var(--white);color:var(--text)}
+input:focus,select:focus{outline:none;border-color:var(--green)}
+.btn{font-family:inherit;font-size:13px;font-weight:600;border:none;border-radius:8px;padding:9px 14px;cursor:pointer;background:var(--green);color:#fff}
+.btn:disabled{background:var(--gray3);cursor:not-allowed}
+.btn.sec{background:var(--white);color:var(--green-dk);border:1.5px solid var(--green)}
+.btn.pur{background:var(--purple)}
+.btn.min{padding:5px 9px;font-size:12px}
+.btn.peligro{background:var(--white);color:var(--red);border:1.5px solid var(--red)}
+.btn.peligro.conf{background:var(--red);color:#fff}
+.msg{font-size:13px;margin-top:.6rem;min-height:1em}
+.msg.err{color:var(--red)}.msg.ok{color:var(--green-dk)}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:980px;font-size:13px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);padding:8px;border-bottom:1px solid var(--gray2);white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid var(--gray2);vertical-align:top}
+td .sub{font-size:12px;color:var(--text3)}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.b-gratis{background:var(--gray2);color:var(--text2)}.b-suscripcion{background:var(--green-lt);color:var(--green-dk)}
+.b-regalo{background:var(--gold-lt);color:#7a5a00}.b-equipo{background:var(--purple-lt);color:var(--purple-dk)}
+.b-cancel{background:var(--red-lt);color:var(--red)}
+.acts{display:flex;flex-wrap:wrap;gap:5px}
+.oculto{display:none!important}
+.aviso{max-width:520px;margin:3rem auto;text-align:center;line-height:1.7}
+.det{background:var(--gray);border-radius:8px;padding:.7rem;margin-top:.5rem;font-size:12px;line-height:1.6}
+@media(max-width:600px){.row{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <a class="logo" href="/">PLANIA<small>Panel de administración</small></a>
+  <span id="yo" style="font-size:13px;color:var(--text2)"></span>
+  <a class="vol" href="/">Volver a planificar</a>
+</header>
+
+<div class="aviso card oculto" id="sin-acceso"></div>
+
+<div class="wrap oculto" id="panel">
+  <div class="tiles" id="tiles"></div>
+
+  <div class="card">
+    <h2>Regalar acceso</h2>
+    <div class="row">
+      <label>Correo del docente<input type="email" id="r-email" placeholder="correo@ejemplo.com" style="min-width:260px"></label>
+      <label>Tipo de acceso<select id="r-tipo"><option value="planes">Número de planificaciones</option><option value="dias">Ilimitado por días</option></select></label>
+      <label><span id="r-cant-lbl">Planificaciones</span><input type="number" id="r-cant" min="1" value="10" style="width:110px"></label>
+      <button class="btn" id="r-btn" onclick="regalar()">Regalar acceso</button>
+    </div>
+    <p class="msg" id="r-msg"></p>
+    <p style="font-size:12px;color:var(--text3);margin-top:.3rem">Si el correo todavía no está registrado, el regalo queda pendiente y se activa cuando esa persona cree su cuenta. Unos días antes de que venza, PLANIA le envía un correo con el enlace para suscribirse.</p>
+    <div id="pendientes"></div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;margin-bottom:.8rem">
+      <div class="row">
+        <label>Buscar<input type="text" id="f-q" placeholder="Nombre, correo, provincia..." style="min-width:240px"></label>
+        <label>Estado<select id="f-est"><option value="">Todos</option><option value="gratis">Plan gratuito</option><option value="suscripcion">Suscripción</option><option value="regalo">Regalo</option><option value="equipo">Equipo</option></select></label>
+      </div>
+      <div class="row">
+        <button class="btn sec" onclick="cargar()">Actualizar</button>
+        <button class="btn pur" id="x-btn" onclick="exportar()">Exportar todo a Excel</button>
+      </div>
+    </div>
+    <p class="msg" id="t-msg"></p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Docente</th><th>Perfil</th><th>Registro</th><th>Planificaciones</th><th>Estado</th><th>Rol</th><th>Acciones</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tk=()=>{try{return localStorage.getItem('plania_token')||'';}catch(e){return '';}};
+const fecha=t=>t?new Date(t).toLocaleDateString('es-EC',{day:'2-digit',month:'short',year:'numeric'}):'';
+let DATOS=null,YO=null;
+
+async function api(datos){
+  const r=await fetch('/.netlify/functions/acceso',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({token:tk()},datos))});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw Object.assign(new Error(j.error||'No se pudo completar la acción.'),{status:r.status});
+  return j;
+}
+function msg(id,t,cl){const e=$(id);e.textContent=t||'';e.className='msg'+(t?' '+(cl||'ok'):'');}
+
+async function cargar(){
+  msg('t-msg','Cargando cuentas...','ok');
+  try{
+    DATOS=await api({accion:'admin_lista'});YO=DATOS.yo;
+    $('sin-acceso').classList.add('oculto');$('panel').classList.remove('oculto');
+    $('yo').textContent=YO.email+' · '+(YO.rol==='admin'?'Administradora':'Colaborador');
+    pintar();msg('t-msg','');
+  }catch(e){
+    $('panel').classList.add('oculto');const s=$('sin-acceso');s.classList.remove('oculto');
+    s.innerHTML=e.status===401?'Tu sesión no está activa en este navegador. <a href="/">Ingresa a PLANIA</a> con tu correo y luego vuelve a esta página.':esc(e.message);
+  }
+}
+
+function estadoTxt(u){
+  if(u.estado==='equipo')return '<span class="badge b-equipo">Equipo · sin límite</span>';
+  if(u.estado==='suscripcion')return `<span class="badge b-suscripcion">Suscripción hasta ${fecha(u.vence)}</span>${u.sub_cancelada?'<br><span class="badge b-cancel" style="margin-top:4px">Cobro cancelado</span>':''}`;
+  if(u.estado==='regalo'){const g=u.regalo;return `<span class="badge b-regalo">${g.tipo==='dias'?'Regalo hasta '+fecha(g.hasta):'Regalo: quedan '+g.restantes+' de '+g.cantidad}</span>`;}
+  return `<span class="badge b-gratis">Gratuito: ${Math.max(0,DATOS.limite-u.usos)} de ${DATOS.limite}</span>${u.sub_cancelada?'<br><span class="badge b-cancel" style="margin-top:4px">Suscripción cancelada</span>':''}`;
+}
+
+function pintar(){
+  const U=DATOS.usuarios;
+  const n=k=>U.filter(u=>u.estado===k).length;
+  $('tiles').innerHTML=[
+    [U.length,'Docentes registrados'],[U.filter(u=>u.perfil).length,'Con perfil completo'],
+    [n('suscripcion'),'Con suscripción activa'],[n('regalo'),'Con acceso de regalo'],
+    [U.reduce((a,u)=>a+(u.total||0),0),'Planificaciones generadas']
+  ].map(([v,t])=>`<div class="tile"><b>${v}</b><span>${t}</span></div>`).join('');
+  $('pendientes').innerHTML=DATOS.pendientes.length?'<div class="det"><b>Regalos pendientes de registro:</b><br>'+DATOS.pendientes.map(p=>`${esc(p.email)}: ${p.cantidad} ${p.tipo==='dias'?'días ilimitados':'planificaciones'} <button class="btn peligro min" onclick="quitarRegalo('${esc(p.email)}')">Quitar</button>`).join('<br>')+'</div>':'';
+  const q=$('f-q').value.trim().toLowerCase(),est=$('f-est').value;
+  const lista=U.filter(u=>(!est||u.estado===est)&&(!q||[u.nombre,u.email,u.perfil&&u.perfil.provincia,u.perfil&&u.perfil.areas,u.perfil&&u.perfil.tipo_institucion].join(' ').toLowerCase().includes(q)));
+  const admin=YO.rol==='admin';
+  $('tbody').innerHTML=lista.map(u=>{
+    const p=u.perfil||{};
+    const rol=admin&&u.email!==YO.email?`<select onchange="cambiarRol('${esc(u.email)}',this.value)">${['docente','colaborador','admin'].map(r=>`<option value="${r}"${u.rol===r?' selected':''}>${r==='admin'?'Administradora':r==='colaborador'?'Colaborador':'Docente'}</option>`).join('')}</select>`:esc(u.rol==='admin'?'Administradora':u.rol==='colaborador'?'Colaborador':'Docente');
+    const cancelar=admin&&u.sub_id&&!u.sub_cancelada?`<button class="btn peligro min" onclick="cancelar(this,'${esc(u.email)}')">Cancelar suscripción</button>`:'';
+    return `<tr>
+      <td><b>${esc(u.nombre||'Sin nombre')}</b><div class="sub">${esc(u.email)}</div></td>
+      <td>${u.perfil?`${esc(p.provincia)} · ${esc(p.tipo_institucion)}<div class="sub">${esc((p.niveles||[]).join(', '))}<br>${esc(p.areas)} · ${esc(p.experiencia)} años</div>`:'<span class="sub">Perfil pendiente</span>'}</td>
+      <td>${fecha(u.creado)}<div class="sub">${u.ultimo_uso?'Último uso '+fecha(u.ultimo_uso):''}</div></td>
+      <td>${u.total||0}</td>
+      <td>${estadoTxt(u)}</td>
+      <td>${rol}</td>
+      <td><div class="acts"><button class="btn sec min" onclick="prepararRegalo('${esc(u.email)}')">Regalar</button>${u.regalo?`<button class="btn peligro min" onclick="quitarRegalo('${esc(u.email)}')">Quitar regalo</button>`:''}${cancelar}</div></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="7" class="sub">No hay cuentas con ese filtro.</td></tr>';
+}
+
+$('r-tipo').addEventListener('change',()=>{$('r-cant-lbl').textContent=$('r-tipo').value==='dias'?'Días':'Planificaciones';$('r-cant').value=$('r-tipo').value==='dias'?30:10;});
+$('f-q').addEventListener('input',()=>DATOS&&pintar());
+$('f-est').addEventListener('change',()=>DATOS&&pintar());
+function prepararRegalo(email){$('r-email').value=email;$('r-email').scrollIntoView({behavior:'smooth',block:'center'});$('r-cant').focus();}
+
+async function regalar(){
+  const email=$('r-email').value.trim().toLowerCase(),tipo=$('r-tipo').value,cantidad=$('r-cant').value;
+  if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)){msg('r-msg','Escribe un correo válido.','err');return;}
+  const b=$('r-btn');b.disabled=true;msg('r-msg','');
+  try{const j=await api({accion:'admin_regalar',email,tipo,cantidad});msg('r-msg',j.pendiente?'Regalo guardado. Se activará cuando ese correo cree su cuenta en PLANIA.':'Acceso regalado a '+email+'.','ok');$('r-email').value='';await cargar();}
+  catch(e){msg('r-msg',e.message,'err');}
+  b.disabled=false;
+}
+async function quitarRegalo(email){try{await api({accion:'admin_quitar_regalo',email});await cargar();msg('t-msg','Regalo retirado de '+email+'.','ok');}catch(e){msg('t-msg',e.message,'err');}}
+async function cambiarRol(email,rol){try{await api({accion:'admin_rol',email,rol});await cargar();msg('t-msg','Rol actualizado para '+email+'.','ok');}catch(e){msg('t-msg',e.message,'err');cargar();}}
+async function cancelar(btn,email){
+  // Doble clic de confirmación dentro de la página: evita cancelar por error.
+  if(!btn.classList.contains('conf')){btn.classList.add('conf');btn.textContent='Confirmar cancelación';setTimeout(()=>{btn.classList.remove('conf');btn.textContent='Cancelar suscripción';},5000);return;}
+  btn.disabled=true;
+  try{await api({accion:'admin_cancelar',email});await cargar();msg('t-msg','Suscripción de '+email+' cancelada en PayPal. No se le volverá a cobrar y conserva el acceso hasta la fecha ya pagada. Si pidió devolución, hazla desde tu cuenta de PayPal.','ok');}
+  catch(e){msg('t-msg',e.message,'err');btn.disabled=false;}
+}
+
+async function exportar(){
+  if(!DATOS)return;
+  const b=$('x-btn');b.disabled=true;
+  try{
+    const U=DATOS.usuarios;
+    const reg=U.map(u=>{const p=u.perfil||{};return{
+      'Correo':u.email,'Nombre':u.nombre,'ID anónimo':u.usuario_id,'Fecha de registro':u.creado,'Último uso':u.ultimo_uso,
+      'Nacionalidad':p.nacionalidad||'','Provincia':p.provincia||'','Tipo de institución':p.tipo_institucion||'','Niveles':(p.niveles||[]).join(', '),
+      'Grados o cursos':p.grados||'','Áreas':p.areas||'','Años de experiencia':p.experiencia??'','Título':p.titulo||'','Estudia actualmente':p.estudia||'',
+      'Acceso a dispositivos':p.dispositivos||'','Rol':u.rol,'Estado':u.estado,'Planificaciones generadas':u.total||0,
+      'Gratuitas usadas':u.usos||0,'Suscripción vence':u.vence?new Date(u.vence).toISOString():'','Suscripción cancelada':u.sub_cancelada?'sí':'',
+      'Regalo':u.regalo?(u.regalo.tipo==='dias'?'ilimitado hasta '+new Date(u.regalo.hasta).toISOString().slice(0,10):u.regalo.restantes+' de '+u.regalo.cantidad+' planificaciones'):'',
+      'Indicaciones guardadas':u.preferencias||''};});
+    const sug=[];U.forEach(u=>(u.sugerencias||[]).forEach(s=>sug.push({'Fecha':s.fecha,'Correo':u.email,'ID anónimo':u.usuario_id,'Sugerencia':s.texto})));
+    const pl=[];const conPlanes=U.filter(u=>(u.total||0)>0);
+    for(let i=0;i<conPlanes.length;i++){
+      msg('t-msg',`Reuniendo planificaciones (${i+1} de ${conPlanes.length} docentes)...`,'ok');
+      const u=conPlanes[i];const j=await api({accion:'admin_planes',email:u.email});
+      j.planes.forEach(h=>{const d=h.datos||{},p=h.plan||{},v=h.valoracion||{};pl.push({
+        'Fecha':h.fecha,'Correo':u.email,'ID anónimo':u.usuario_id,'ID planificación':h.plan_id,'Subnivel':d.subnivel,'Asignatura':d.asignatura,'Grado':d.grado,
+        'Código destreza':d.codigo,'Destreza':d.destreza,'Indicador':d.indicador,'Destrezas secundarias':(p.secundarias||[]).map(x=>x.codigo||x.destreza).join(' | '),
+        'Secuencia':d.secuencia,'Metodología':d.metodologia,'Inicio':d.inicio||'','Herramientas digitales':d.digitales||'','Competencias':(d.competencias||[]).join(', '),
+        'Períodos':d.periodos,'Tema':p.tema||d.tema,'Indicaciones del docente':d.preferencias||'','Ajuste razonable':d.nee_ajuste||'','Adaptación curricular':d.nee_adaptacion||'',
+        '¿Le sirvió?':v.sirvio||'','¿Cuánto la modificaría?':v.modificacion||''});});
+    }
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(reg.length?reg:[{}]),'Registrados');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(pl.length?pl:[{}]),'Planificaciones');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(sug.length?sug:[{}]),'Sugerencias');
+    XLSX.writeFile(wb,'PLANIA_datos_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    msg('t-msg','Archivo de Excel descargado.','ok');
+  }catch(e){msg('t-msg','No se pudo exportar: '+e.message,'err');}
+  b.disabled=false;
+}
+cargar();
+</script>
+</body>
+</html>

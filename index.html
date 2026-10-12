@@ -636,7 +636,9 @@ function pintarUsuario(){
   if(!u.perfil_completo){abrirPerfil();}
   else{$('perfil-box').classList.remove('show');$('main').classList.remove('oculto');if(!prefCargada){prefCargada=true;if(u.preferencias&&!val('preferencias'))$('preferencias').value=u.preferencias;}}
   let estado;
-  if(u.suscripcion_activa) estado=`<span class="usr-pill">Suscripción activa hasta ${new Date(u.vence).toLocaleDateString('es-EC')}</span>`;
+  if(u.estado==='equipo') estado=`<span class="usr-pill">Cuenta del equipo · sin límite</span> <a href="/admin.html">Panel</a>`;
+  else if(u.suscripcion_activa) estado=`<span class="usr-pill">Suscripción activa hasta ${new Date(u.vence).toLocaleDateString('es-EC')}</span>`;
+  else if(u.estado==='regalo'&&u.regalo) estado=`<span class="usr-pill">${u.regalo.tipo==='dias'?'Acceso de regalo hasta '+new Date(u.regalo.hasta).toLocaleDateString('es-EC'):'Te quedan '+u.regalo.restantes+' planificaciones de regalo'}</span>`;
   else if(u.cobro_activo){const q=Math.max(0,u.limite-u.usos);estado=`<span class="usr-pill${q?'':' fin'}">${q?`Te quedan ${q} de ${u.limite} planificaciones gratuitas`:'Planificaciones gratuitas agotadas'}</span>${q?'':' <a onclick="abrirPago()">Suscribirme</a>'}`;}
   else estado=`<span class="usr-pill">Acceso de prueba sin costo</span>`;
   box.innerHTML=`<span><b>${esc(u.nombre||u.email)}</b></span>${estado}<a onclick="salir()">Salir</a>`;
