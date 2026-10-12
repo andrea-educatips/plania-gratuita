@@ -84,6 +84,20 @@ function estadoPlan(u) {
 
 const perfilCompleto = (u) => !!(u.perfil && (u.perfil_v || 0) >= PERFIL_V && (u.consent_v || 0) >= CONSENT_V);
 
+// Contraseña cifrada con scrypt y sal propia. Nunca se guarda el texto original.
+function cifrarClave(clave) {
+  const sal = crypto.randomBytes(16).toString("hex");
+  return "scrypt$" + sal + "$" + crypto.scryptSync(clave, sal, 64).toString("hex");
+}
+function claveOk(clave, guardada) {
+  if (!guardada || typeof clave !== "string") return false;
+  const [, sal, hash] = String(guardada).split("$");
+  if (!sal || !hash) return false;
+  const a = crypto.scryptSync(clave, sal, 64), b = Buffer.from(hash, "hex");
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+function claveValida(c) { return typeof c === "string" && c.length >= 8 && c.length <= 100; }
+
 function publico(u) {
   const activa = (u.paid_until || 0) > Date.now();
   return {
@@ -163,6 +177,9 @@ export default async (req) => {
       const email = txt(b.email, 255).toLowerCase(), nombre = txt(b.nombre, 80);
       if (!correoOk(email)) return out(400, { error: "Escribe un correo electrónico válido." });
       const existe = await store.get("u/" + email, { type: "json" });
+      const proposito = b.proposito === "clave" ? "clave" : "registro";
+      if (proposito === "registro" && existe && existe.clave) return out(409, { error: "Ya tienes una cuenta con ese correo. Ingresa con tu correo y tu contraseña.", ya_existe: true });
+      if (proposito === "clave" && !existe) return out(404, { error: "No encontramos una cuenta con ese correo. Revisa cómo lo escribiste o crea tu cuenta." });
       if (!existe && (!nombre || b.acepta !== true)) return out(400, { error: "Para crear tu cuenta escribe tu nombre y acepta el uso de tus datos." });
       const ahora = Date.now();
       const previo = (await store.get("c/" + email, { type: "json" })) || {};
@@ -179,8 +196,30 @@ export default async (req) => {
       return out(200, { ok: true, nueva: !existe });
     }
 
+    if (accion === "ingresar") {
+      const email = txt(b.email, 255).toLowerCase();
+      if (!correoOk(email)) return out(400, { error: "Escribe un correo electrónico válido." });
+      const u = await store.get("u/" + email, { type: "json" });
+      if (!u) return out(404, { error: "No encontramos una cuenta con ese correo. Revisa cómo lo escribiste o crea tu cuenta.", sin_cuenta: true });
+      if (!u.clave) return out(409, { error: "Ya tienes cuenta, pero aún no has creado tu contraseña. Te enviaremos un código para crearla.", sin_clave: true });
+      const ahora = Date.now();
+      const f = u.fallos || { n: 0, hasta: 0 };
+      if (f.hasta > ahora) return out(429, { error: "Hubo varios intentos fallidos. Espera 15 minutos o usa la opción Olvidé mi contraseña." });
+      if (!claveOk(typeof b.clave === "string" ? b.clave.slice(0, 100) : "", u.clave)) {
+        f.n = (f.n || 0) + 1;
+        if (f.n >= 6) { f.n = 0; f.hasta = ahora + 15 * 60 * 1000; }
+        u.fallos = f; await store.setJSON("u/" + email, u);
+        return out(400, { error: "La contraseña no coincide. Revísala o usa la opción Olvidé mi contraseña." });
+      }
+      if (u.fallos) { delete u.fallos; await store.setJSON("u/" + email, u); }
+      const token = crypto.randomBytes(24).toString("hex");
+      await store.setJSON("s/" + token, { email, exp: ahora + 60 * DIA });
+      return out(200, { token, usuario: publico(u) });
+    }
+
     if (accion === "verificar") {
       const email = txt(b.email, 255).toLowerCase(), codigo = txt(b.codigo, 6);
+      if (!claveValida(b.clave)) return out(400, { error: "La contraseña debe tener al menos 8 caracteres." });
       const c = await store.get("c/" + email, { type: "json" });
       if (!c || !c.codigo || c.exp < Date.now()) return out(400, { error: "El código venció. Pide uno nuevo." });
       if (c.intentos >= 5) return out(429, { error: "Demasiados intentos. Pide un código nuevo." });
@@ -194,6 +233,9 @@ export default async (req) => {
         await store.setJSON("u/" + email, u);
         await hoja({ tipo: "usuario", fecha: u.creado, email, nombre: u.nombre, acepta: c.acepta ? "sí (v" + CONSENT_V + ")" : "no" }, 8000);
       }
+      u.clave = cifrarClave(b.clave);
+      delete u.fallos;
+      await store.setJSON("u/" + email, u);
       await store.setJSON("c/" + email, { envios: c.envios || [] });
       const token = crypto.randomBytes(24).toString("hex");
       await store.setJSON("s/" + token, { email, exp: Date.now() + 60 * DIA });
