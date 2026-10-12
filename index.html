@@ -228,6 +228,9 @@ textarea[readonly]{background:var(--gray)}
 .acc-msg{font-size:13px;line-height:1.6;margin-top:.7rem;display:none}
 .acc-msg.show{display:block}
 .acc-msg.err{color:#8a0000}.acc-msg.ok{color:var(--green-dk)}
+.acc-tabs{display:flex;gap:6px;margin-bottom:1rem;border-bottom:1px solid var(--border,#e2e2da)}
+.acc-tab{flex:1;background:none;border:none;border-bottom:3px solid transparent;padding:.6rem .4rem;font:inherit;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer}
+.acc-tab.on{color:var(--green-dk);border-bottom-color:var(--green-dk)}
 .acc-link{font-size:12px;color:var(--purple);cursor:pointer;text-decoration:underline;display:inline-block;margin-top:.7rem}
 #f-codigo{letter-spacing:8px;font-size:22px;text-align:center;font-weight:600}
 .main.oculto{display:none}
@@ -309,19 +312,41 @@ textarea[readonly]{background:var(--gray)}
 <!-- INGRESO -->
 <div class="acceso" id="acceso">
   <div class="card">
-    <div class="card-hdr"><div class="card-icon ic-g">✉️</div><div><div class="card-title">Ingresa a PLANIA</div><div class="card-sub">Te enviamos un código a tu correo. No necesitas contraseña</div></div></div>
+    <div class="card-hdr"><div class="card-icon ic-g">🔑</div><div><div class="card-title">Ingresa a PLANIA</div><div class="card-sub" id="acc-sub">Entra con tu correo y tu contraseña</div></div></div>
     <div class="card-body">
-      <div id="paso-correo">
+      <div class="acc-tabs" id="acc-tabs">
+        <button type="button" class="acc-tab on" data-p="ingresar" onclick="verPaso('ingresar')">Ingresar</button>
+        <button type="button" class="acc-tab" data-p="crear" onclick="verPaso('crear')">Crear cuenta</button>
+      </div>
+      <div id="paso-ingresar" class="acc-paso">
+        <div class="field"><label>Correo electrónico</label><input type="email" id="i-email" placeholder="tucorreo@ejemplo.com" autocomplete="username"></div>
+        <div class="field"><label>Contraseña</label><input type="password" id="i-clave" autocomplete="current-password"></div>
+        <button class="btn-gen" id="btn-ingresar" onclick="ingresar()">Ingresar</button>
+        <span class="acc-link" onclick="verPaso('olvido')">Olvidé mi contraseña o aún no la he creado</span>
+      </div>
+      <div id="paso-crear" class="acc-paso" style="display:none">
         <div class="field"><label>Nombre y apellido <span class="req">*</span></label><input type="text" id="f-nombre" autocomplete="name"></div>
         <div class="field"><label>Correo electrónico <span class="req">*</span></label><input type="email" id="f-email" placeholder="tucorreo@ejemplo.com" autocomplete="email"></div>
+        <div class="field"><label>Crea una contraseña <span class="req">*</span></label><input type="password" id="f-clave" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></div>
+        <div class="field"><label>Repite la contraseña <span class="req">*</span></label><input type="password" id="f-clave2" autocomplete="new-password"></div>
         <label class="acc-check"><input type="checkbox" id="f-acepta"><span id="txt-acepta">Autorizo a Andrea Educatips a guardar mis datos para administrar mi cuenta, enviarme información de sus cursos y productos, y usarlos de forma anónima con fines de investigación educativa. Puedo pedir que me retiren cuando quiera.</span></label>
-        <button class="btn-gen" id="btn-codigo" onclick="pedirCodigo()">Enviarme el código</button>
-        <span class="hint" style="display:block;margin-top:.6rem">Si ya tienes cuenta, basta con tu correo.</span>
+        <button class="btn-gen" id="btn-crear" onclick="crearCuenta()">Crear mi cuenta</button>
+        <span class="hint" style="display:block;margin-top:.6rem">Te enviaremos un código a tu correo, solo esta vez, para confirmar que es tuyo.</span>
       </div>
-      <div id="paso-codigo" style="display:none">
+      <div id="paso-olvido" class="acc-paso" style="display:none">
+        <p class="hint" style="display:block;margin:0 0 .8rem">Escribe el correo con el que te registraste. Te enviaremos un código para crear una contraseña nueva.</p>
+        <div class="field"><label>Correo electrónico</label><input type="email" id="o-email" placeholder="tucorreo@ejemplo.com" autocomplete="email"></div>
+        <button class="btn-gen" id="btn-olvido" onclick="pedirCodigoClave()">Enviarme el código</button>
+        <span class="acc-link" onclick="verPaso('ingresar')">Volver a ingresar</span>
+      </div>
+      <div id="paso-codigo" class="acc-paso" style="display:none">
         <div class="field"><label>Código de 6 dígitos que llegó a <b id="f-email-txt"></b></label><input type="text" id="f-codigo" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></div>
-        <button class="btn-gen" id="btn-entrar" onclick="verificarCodigo()">Ingresar</button>
-        <span class="acc-link" onclick="volverCorreo()">Usar otro correo o pedir un código nuevo</span>
+        <div id="codigo-clave" style="display:none">
+          <div class="field"><label>Nueva contraseña</label><input type="password" id="n-clave" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></div>
+          <div class="field"><label>Repite la nueva contraseña</label><input type="password" id="n-clave2" autocomplete="new-password"></div>
+        </div>
+        <button class="btn-gen" id="btn-entrar" onclick="verificarCodigo()">Confirmar e ingresar</button>
+        <span class="acc-link" onclick="verPaso(MODO==='clave'?'olvido':'crear')">Usar otro correo o pedir un código nuevo</span>
       </div>
       <div class="acc-msg" id="acc-msg"></div>
     </div>
@@ -824,29 +849,82 @@ async function iniciarSesion(){
   try{const j=await cuentaApi({accion:'estado',token:tk()});USR=j.usuario;}catch(e){if(e.status===401)setTk('');USR=null;}
   pintarUsuario();
 }
-async function pedirCodigo(){
-  const email=val('f-email').toLowerCase(),nombre=val('f-nombre'),acepta=$('f-acepta').checked;
-  if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)){accMsg('Escribe un correo electrónico válido.');return;}
-  const b=$('btn-codigo');b.disabled=true;b.textContent='Enviando...';accMsg('');
-  try{
-    await cuentaApi({accion:'solicitar',email,nombre,acepta});
-    $('f-email-txt').textContent=email;$('paso-correo').style.display='none';$('paso-codigo').style.display='block';$('f-codigo').value='';$('f-codigo').focus();
-    accMsg('Código enviado. Si no lo ves en un par de minutos, revisa la carpeta de spam o promociones.','ok');
-  }catch(e){accMsg(e.message);}
+let MODO='registro',ACC_EMAIL='',ACC_CLAVE='';
+const CORREO_RE=/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
+function verPaso(p){
+  ['ingresar','crear','olvido','codigo'].forEach(x=>{$('paso-'+x).style.display=x===p?'block':'none';});
+  document.querySelectorAll('.acc-tab').forEach(t=>t.classList.toggle('on',t.dataset.p===p));
+  $('acc-tabs').style.display=(p==='ingresar'||p==='crear')?'flex':'none';
+  $('acc-sub').textContent={ingresar:'Entra con tu correo y tu contraseña',crear:'Crea tu cuenta gratuita',olvido:'Crea una contraseña nueva',codigo:'Revisa tu correo'}[p];
+  accMsg('');
+}
+function mostrarCodigo(email,modo){
+  MODO=modo;ACC_EMAIL=email;
+  $('f-email-txt').textContent=email;$('f-codigo').value='';
+  $('codigo-clave').style.display=modo==='clave'?'block':'none';
+  $('n-clave').value='';$('n-clave2').value='';
+  verPaso('codigo');$('f-codigo').focus();
+  accMsg('Código enviado. Si no lo ves en un par de minutos, revisa la carpeta de spam o promociones.','ok');
+}
+function entrarCon(j){
+  setTk(j.token);USR=j.usuario;ACC_CLAVE='';
+  ['i-clave','f-clave','f-clave2','n-clave','n-clave2','f-codigo'].forEach(id=>{$(id).value='';});
+  verPaso('ingresar');pintarUsuario();window.scrollTo({top:0});
+}
+async function ingresar(){
+  const email=val('i-email').toLowerCase(),clave=$('i-clave').value;
+  if(!CORREO_RE.test(email)){accMsg('Escribe un correo electrónico válido.');return;}
+  if(!clave){accMsg('Escribe tu contraseña.');return;}
+  const b=$('btn-ingresar');b.disabled=true;b.textContent='Ingresando...';accMsg('');
+  try{entrarCon(await cuentaApi({accion:'ingresar',email,clave}));}
+  catch(e){
+    if(e.status===409){$('o-email').value=email;verPaso('olvido');accMsg(e.message,'ok');}
+    else accMsg(e.message);
+  }
+  b.disabled=false;b.textContent='Ingresar';
+}
+async function crearCuenta(){
+  const email=val('f-email').toLowerCase(),nombre=val('f-nombre'),acepta=$('f-acepta').checked,c1=$('f-clave').value,c2=$('f-clave2').value;
+  if(!nombre){accMsg('Escribe tu nombre y apellido.');return;}
+  if(!CORREO_RE.test(email)){accMsg('Escribe un correo electrónico válido.');return;}
+  if(c1.length<8){accMsg('La contraseña debe tener al menos 8 caracteres.');return;}
+  if(c1!==c2){accMsg('Las dos contraseñas no coinciden.');return;}
+  if(!acepta){accMsg('Para crear tu cuenta marca la casilla de autorización.');return;}
+  const b=$('btn-crear');b.disabled=true;b.textContent='Enviando código...';accMsg('');
+  try{await cuentaApi({accion:'solicitar',proposito:'registro',email,nombre,acepta});ACC_CLAVE=c1;mostrarCodigo(email,'registro');}
+  catch(e){
+    if(e.status===409){$('i-email').value=email;verPaso('ingresar');accMsg(e.message,'ok');}
+    else accMsg(e.message);
+  }
+  b.disabled=false;b.textContent='Crear mi cuenta';
+}
+async function pedirCodigoClave(){
+  const email=val('o-email').toLowerCase();
+  if(!CORREO_RE.test(email)){accMsg('Escribe un correo electrónico válido.');return;}
+  const b=$('btn-olvido');b.disabled=true;b.textContent='Enviando...';accMsg('');
+  try{await cuentaApi({accion:'solicitar',proposito:'clave',email});mostrarCodigo(email,'clave');}
+  catch(e){accMsg(e.message);}
   b.disabled=false;b.textContent='Enviarme el código';
 }
 async function verificarCodigo(){
+  let clave=ACC_CLAVE;
+  if(MODO==='clave'){
+    const c1=$('n-clave').value,c2=$('n-clave2').value;
+    if(c1.length<8){accMsg('La contraseña debe tener al menos 8 caracteres.');return;}
+    if(c1!==c2){accMsg('Las dos contraseñas no coinciden.');return;}
+    clave=c1;
+  }
+  if(!/^\d{6}$/.test(val('f-codigo'))){accMsg('Escribe el código de 6 dígitos.');return;}
   const b=$('btn-entrar');b.disabled=true;accMsg('');
-  try{
-    const j=await cuentaApi({accion:'verificar',email:val('f-email').toLowerCase(),codigo:val('f-codigo')});
-    setTk(j.token);USR=j.usuario;volverCorreo();pintarUsuario();window.scrollTo({top:0});
-  }catch(e){accMsg(e.message);}
+  try{entrarCon(await cuentaApi({accion:'verificar',email:ACC_EMAIL,codigo:val('f-codigo'),clave}));}
+  catch(e){accMsg(e.message);}
   b.disabled=false;
 }
-function volverCorreo(){$('paso-codigo').style.display='none';$('paso-correo').style.display='block';accMsg('');}
 function salir(){const t=tk();setTk('');USR=null;pintarUsuario();if(t)cuentaApi({accion:'salir',token:t}).catch(()=>{});}
 $('f-codigo').addEventListener('keydown',e=>{if(e.key==='Enter')verificarCodigo();});
-$('f-email').addEventListener('keydown',e=>{if(e.key==='Enter')pedirCodigo();});
+$('i-clave').addEventListener('keydown',e=>{if(e.key==='Enter')ingresar();});
+$('i-email').addEventListener('keydown',e=>{if(e.key==='Enter')$('i-clave').focus();});
+$('o-email').addEventListener('keydown',e=>{if(e.key==='Enter')pedirCodigoClave();});
 // ---------- PERFIL DOCENTE ----------
 let prefCargada=false;
 const PROVINCIAS=['Azuay','Bolívar','Cañar','Carchi','Chimborazo','Cotopaxi','El Oro','Esmeraldas','Galápagos','Guayas','Imbabura','Loja','Los Ríos','Manabí','Morona Santiago','Napo','Orellana','Pastaza','Pichincha','Santa Elena','Santo Domingo de los Tsáchilas','Sucumbíos','Tungurahua','Zamora Chinchipe','Trabajo fuera de Ecuador'];
