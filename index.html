@@ -244,6 +244,38 @@ textarea[readonly]{background:var(--gray)}
 .val-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}
 .val-btn.on{background:var(--green);color:#fff}
 .sit-box{background:var(--blue-lt);border-left:3px solid var(--blue);padding:6px 9px;margin:0 0 8px}
+.app{max-width:1180px;margin:1.75rem auto;padding:0 1.25rem;display:grid;grid-template-columns:260px minmax(0,1fr);gap:1.25rem;align-items:start}
+.app .main{margin:0;max-width:none;padding:0}
+.app:has(#main.oculto){display:block;max-width:none;margin:0;padding:0}
+.app:has(#main.oculto) #lateral{display:none}
+#v-plan{display:flex;flex-direction:column;gap:1.1rem}
+.vista{display:none;flex-direction:column;gap:1.1rem}
+.vista.show{display:flex}
+.lat{position:sticky;top:1rem;display:flex;flex-direction:column;gap:.9rem}
+.lat-card{background:var(--white);border:1px solid var(--gray2);border-radius:var(--radius);padding:1rem}
+.lat-nom{font-weight:600;font-size:15px}
+.lat-mail{font-size:12px;color:var(--text3);word-break:break-all;margin-bottom:.5rem}
+.lat-dato{font-size:12px;color:var(--text2);line-height:1.6}
+.lat-plan{margin:.7rem 0 .4rem;padding:.6rem .7rem;border-radius:var(--radius-sm);background:var(--green-lt);color:var(--green-dk);font-size:12px;font-weight:600;line-height:1.5}
+.lat-plan.fin{background:var(--purple-lt);color:var(--purple-dk)}
+.lat-links{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;margin-top:.4rem}
+.lat-links a{color:var(--purple);cursor:pointer;text-decoration:underline}
+.menu{display:flex;flex-direction:column;gap:3px}
+.menu-t{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:.6rem 0 .3rem}
+.mi{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:8px 10px;border-radius:var(--radius-sm);font-size:13px;color:var(--text2);cursor:pointer;border:none;background:none;text-align:left;font-family:'DM Sans',sans-serif;width:100%}
+.mi:hover{background:var(--gray)}
+.mi.on{background:var(--green-lt);color:var(--green-dk);font-weight:600}
+.mi.prox{color:var(--text3)}
+.mi .tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--gray2);color:var(--text3);white-space:nowrap}
+.hist-item{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:.8rem 0;border-bottom:1px solid var(--gray2)}
+.hist-item:last-child{border-bottom:none}
+.hist-t{font-weight:600;font-size:14px}
+.hist-s{font-size:12px;color:var(--text3);margin-top:2px}
+.hist-acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.btn-s{padding:7px 12px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--green);background:var(--white);color:var(--green-dk)}
+.btn-s.pri{background:var(--green);color:#fff}
+.btn-s.lock{border-color:var(--gray3);color:var(--text3)}
+@media(max-width:900px){.app{grid-template-columns:1fr}.lat{position:static}.menu{flex-direction:row;flex-wrap:wrap}.mi{width:auto}.menu-t{width:100%}}
 .pay-list{font-size:13px;color:var(--text2);line-height:1.8;margin:.8rem 0 1.1rem;padding-left:1.1rem}
 </style>
 </head>
@@ -340,7 +372,25 @@ textarea[readonly]{background:var(--gray)}
   </div>
 </div>
 
+<div class="app" id="app">
+<aside id="lateral" class="lat">
+  <div class="lat-card" id="lat-perfil"></div>
+  <div class="lat-card">
+    <div class="menu" id="menu">
+      <button class="mi on" data-v="plan">📋 Planificación por destrezas<br>Elemental a Bachillerato</button>
+      <button class="mi" data-v="hist">🗂️ Mis planificaciones</button>
+      <button class="mi" data-v="sug">💡 Sugerencias</button>
+      <div class="menu-t">Próximamente</div>
+      <button class="mi prox" data-v="prox" data-m="Planificación Inicial y Preparatoria">Inicial y Preparatoria <span class="tag">Pronto</span></button>
+      <button class="mi prox" data-v="prox" data-m="Planificación de Bachillerato Técnico">Bachillerato Técnico <span class="tag">Pronto</span></button>
+      <button class="mi prox" data-v="prox" data-m="Planificación por competencias (pilotaje)">Por competencias (pilotaje) <span class="tag">Pronto</span></button>
+      <button class="mi prox" data-v="prox" data-m="Planificación para escolaridad inconclusa">Escolaridad inconclusa <span class="tag">Pronto</span></button>
+      <button class="mi prox" data-v="prox" data-m="Planificación multigrado">Multigrado <span class="tag">Pronto</span></button>
+    </div>
+  </div>
+</aside>
 <div class="main oculto" id="main">
+<div id="v-plan">
 
 <!-- DATOS -->
 <div class="card" id="s-datos">
@@ -609,7 +659,40 @@ textarea[readonly]{background:var(--gray)}
   </div>
   <button class="btn-nueva" onclick="nueva()">+ Generar otra planificación</button>
 </div>
+</div>
 
+<!-- MIS PLANIFICACIONES -->
+<div class="vista" id="v-hist">
+  <div class="card">
+    <div class="card-hdr"><div class="card-icon ic-g">🗂️</div><div><div class="card-title">Mis planificaciones</div><div class="card-sub">Puedes verlas y descargarlas siempre. Para duplicarlas y mejorarlas necesitas planificaciones disponibles o una suscripción</div></div></div>
+    <div class="card-body" id="hist-lista">Cargando...</div>
+  </div>
+</div>
+
+<!-- SUGERENCIAS -->
+<div class="vista" id="v-sug">
+  <div class="card">
+    <div class="card-hdr"><div class="card-icon ic-p">💡</div><div><div class="card-title">¿Qué te gustaría que tenga PLANIA?</div><div class="card-sub">Tus sugerencias nos ayudan a decidir qué construir primero</div></div></div>
+    <div class="card-body">
+      <textarea id="sug-txt" maxlength="1500" style="min-height:120px" placeholder="Cuéntanos qué te gustaría que PLANIA haga, qué mejorarías o qué te costó usar."></textarea>
+      <button class="btn-gen" id="btn-sug" onclick="enviarSugerencia()" style="margin-top:.8rem">Enviar sugerencia</button>
+      <div class="acc-msg" id="sug-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRÓXIMAMENTE -->
+<div class="vista" id="v-prox">
+  <div class="card">
+    <div class="card-body" style="text-align:center;padding:2.5rem 1.5rem">
+      <div style="font-size:34px;margin-bottom:.6rem">🚧</div>
+      <div class="card-title" id="prox-tit" style="font-size:17px;margin-bottom:.5rem"></div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;max-width:460px;margin:0 auto">Este módulo está en construcción. Mientras tanto puedes usar la planificación por destrezas o dejarnos una sugerencia sobre lo que necesitas en este nivel.</p>
+    </div>
+  </div>
+</div>
+
+</div>
 </div>
 
 <script>
@@ -631,6 +714,7 @@ async function cuentaApi(datos){
 function accMsg(t,clase,id){const e=$(id||'acc-msg');e.textContent=t||'';e.className='acc-msg'+(t?' show '+(clase||'err'):'');}
 function pintarUsuario(){
   const u=USR,box=$('usr');
+  $('banner').style.display=u?'none':'';document.querySelector('.hero').style.display=u?'none':'';
   if(!u){box.classList.remove('show');$('acceso').classList.add('show');$('perfil-box').classList.remove('show');$('main').classList.add('oculto');return;}
   $('acceso').classList.remove('show');
   if(!u.perfil_completo){abrirPerfil();}
@@ -642,9 +726,99 @@ function pintarUsuario(){
   else if(u.cobro_activo){const q=Math.max(0,u.limite-u.usos);estado=`<span class="usr-pill${q?'':' fin'}">${q?`Te quedan ${q} de ${u.limite} planificaciones gratuitas`:'Planificaciones gratuitas agotadas'}</span>${q?'':' <a onclick="abrirPago()">Suscribirme</a>'}`;}
   else estado=`<span class="usr-pill">Acceso de prueba sin costo</span>`;
   box.innerHTML=`<span><b>${esc(u.nombre||u.email)}</b></span>${estado}<a onclick="salir()">Salir</a>`;
+  pintarLateral(u);
   box.classList.add('show');
   $('pay-valor').textContent=u.precio;
 }
+// ---------- PANEL LATERAL DEL DOCENTE ----------
+const fechaEs=t=>new Date(t).toLocaleDateString('es-EC',{day:'numeric',month:'long',year:'numeric'});
+function puedeGenerar(u){u=u||USR;return !!u&&(['equipo','suscripcion','regalo'].includes(u.estado)||!u.cobro_activo||u.usos<u.limite);}
+function pintarLateral(u){
+  const p=u.perfil||{};
+  let plan,fin=false;
+  if(u.estado==='equipo')plan='Cuenta del equipo de Andrea Educatips. Planificaciones sin límite.';
+  else if(u.suscripcion_activa)plan=`Suscripción mensual activa.<br>Habilitada hasta el ${fechaEs(u.vence)}.`;
+  else if(u.estado==='regalo'&&u.regalo)plan=u.regalo.tipo==='dias'?`Acceso de regalo ilimitado.<br>Vence el ${fechaEs(u.regalo.hasta)}.`:`Acceso de regalo.<br>Te quedan ${u.regalo.restantes} de ${u.regalo.cantidad} planificaciones.`;
+  else if(u.cobro_activo){const q=Math.max(0,u.limite-u.usos);fin=!q;plan=q?`Plan gratuito.<br>Te quedan ${q} de ${u.limite} planificaciones.`:'Usaste tus planificaciones gratuitas.';}
+  else plan='Acceso de prueba sin costo.';
+  $('lat-perfil').innerHTML=`<div class="lat-nom">${esc(u.nombre||'Docente')}</div><div class="lat-mail">${esc(u.email)}</div>
+    ${u.perfil?`<div class="lat-dato">${esc(p.provincia)} · ${esc(p.tipo_institucion)}<br>${esc((p.niveles||[]).join(', '))}<br>${esc(p.areas)}<br>${esc(p.experiencia)} años de experiencia</div>`:''}
+    <div class="lat-plan${fin?' fin':''}">${plan}</div>
+    ${fin&&u.paypal?'<button class="btn-s pri" style="width:100%" onclick="abrirPago()">Suscribirme por $'+esc(u.precio)+' al mes</button>':''}
+    <div class="lat-links"><a onclick="abrirPerfil()">Editar mi perfil</a>${u.rol&&u.rol!=='docente'?'<a href="/admin.html">Panel de administración</a>':''}<a onclick="salir()">Salir</a></div>`;
+}
+let HIST=null;
+function verVista(v,interno){
+  document.querySelectorAll('#menu .mi').forEach(b=>b.classList.toggle('on',b.dataset.v===v&&(v!=='prox'||b.dataset.m===$('prox-tit').textContent)));
+  $('v-plan').style.display=v==='plan'?'flex':'none';
+  ['hist','sug','prox'].forEach(k=>$('v-'+k).classList.toggle('show',k===v));
+  if(v==='hist')cargarHistorial();
+  if(!interno)window.scrollTo({top:0,behavior:'smooth'});
+}
+$('menu').addEventListener('click',e=>{
+  const b=e.target.closest('.mi');if(!b)return;
+  if(b.dataset.v==='prox')$('prox-tit').textContent=b.dataset.m;
+  verVista(b.dataset.v);
+});
+async function cargarHistorial(){
+  const box=$('hist-lista');
+  if(!HIST){box.textContent='Cargando...';try{HIST=(await cuentaApi({accion:'mis_planes',token:tk()})).planes;}catch(e){box.textContent=e.message;return;}}
+  if(!HIST.length){box.innerHTML='<p class="hint" style="font-size:13px">Todavía no tienes planificaciones guardadas. Las que generes desde ahora aparecerán aquí.</p>';return;}
+  const ok=puedeGenerar();
+  box.innerHTML=HIST.map(h=>`<div class="hist-item"><div><div class="hist-t">${esc(h.tema||'Planificación')}</div>
+    <div class="hist-s">${esc(h.asignatura)} · ${esc(h.grado)}${h.codigo?' · '+esc(h.codigo):''} · ${esc(h.secuencia)}<br>${fechaEs(h.fecha)}${h.valoracion&&h.valoracion.sirvio?' · '+esc(h.valoracion.sirvio):''}</div></div>
+    <div class="hist-acts"><button class="btn-s" onclick="verPlan('${esc(h.plan_id)}')">Ver y descargar</button>
+    <button class="btn-s ${ok?'pri':'lock'}" onclick="duplicarPlan('${esc(h.plan_id)}')">${ok?'Duplicar y mejorar':'🔒 Duplicar y mejorar'}</button></div></div>`).join('');
+}
+const REG={};
+async function traerPlan(id){if(REG[id])return REG[id];const j=await cuentaApi({accion:'mi_plan',token:tk(),plan_id:id});REG[id]=j.registro;return j.registro;}
+function datosDe(r){return Object.assign({trimestre:'',institucion:'',docente:'',area:'',periodo_lectivo:'',unidad:'',titulo_unidad:'',paralelo:'',fecha_inicio:'',fecha_fin:'',competencias:[],inserciones:[],secuencia:'ERCA',destreza:'',indicador:''},r.datos||{});}
+async function verPlan(id){
+  try{
+    const r=await traerPlan(id);const d=datosDe(r);
+    ult={d,plan:r.plan};planId=r.plan_id;
+    $('val-box').innerHTML=VAL_HTML;
+    mostrarResultado(d,r.plan,[d.periodos,d.minutos].filter(Boolean).join(' · '));
+  }catch(e){alertaHist(e.message);}
+}
+function alertaHist(t){$('hist-lista').insertAdjacentHTML('afterbegin',`<p class="acc-msg show err">${esc(t)}</p>`);}
+async function duplicarPlan(id){
+  if(!puedeGenerar()){abrirPago();return;}
+  let r;try{r=await traerPlan(id);}catch(e){alertaHist(e.message);return;}
+  const d=datosDe(r),plan=r.plan||{};
+  nueva();verVista('plan');
+  const setv=(i,v)=>{if($(i)&&v!=null)$(i).value=v;};
+  setv('subnivel',d.subnivel);alCambiarSubnivel();
+  setv('asignatura',d.asignatura);alCambiarAsignatura();
+  ['grado','area','institucion','periodo_lectivo','unidad','titulo_unidad','tema','preferencias','nee_ajuste','nee_adaptacion','destreza_desagregada'].forEach(k=>setv(k,d[k]||''));
+  setv('trimestre',d.trimestre||'Primer');
+  const nP=parseInt(d.periodos,10),nM=parseInt(d.minutos,10);
+  const op=[...$('periodos').options].find(o=>o.value===nP+'|'+nM);if(op)$('periodos').value=op.value;
+  if(enMapa()&&d.codigo){
+    $('buscar').value=d.codigo;filtrar();
+    const i=mapaLista.findIndex(e=>e.c===d.codigo);
+    if(i>=0){$('sel-destreza').value=String(i);elegirDestreza();
+      const si=$('sel-ind');if(si.style.display!=='none'){const j=[...si.options].findIndex(o=>o.value!==''&&d.indicador.startsWith(o.textContent.replace(/…$/,'')));if(j>0){si.selectedIndex=j;si.onchange();}}}
+    const k=subKey();
+    SEC=(plan.secundarias||[]).map(x=>({asig:x.asignatura,q:'',sel:((MAPA.m[k]||{})[x.asignatura]||[]).find(e=>e.c===x.codigo)||null})).filter(x=>x.sel);
+    pintarSecundarias();
+  }else{setv('destreza',d.destreza);setv('indicador',d.indicador);}
+  document.querySelectorAll('.seq-btn[data-seq]').forEach(b=>b.classList.toggle('on',b.dataset.seq===(d.secuencia||'ERCA')));
+  const met=d.metodologia&&d.metodologia!=='sin metodología específica'?d.metodologia:'';
+  document.querySelectorAll('#metod-grid .mb').forEach(b=>b.classList.toggle('on',b.dataset.m===met));actualizarInicio();
+  document.querySelectorAll('#inicio-grid .mb').forEach(b=>b.classList.toggle('on',b.dataset.i===d.inicio));
+  document.querySelectorAll('#dig-grid .seq-btn').forEach(b=>b.classList.toggle('on',b.dataset.d===d.digitales));
+  const e=$('err-msg');e.textContent='Cargamos los datos de tu planificación anterior. Ajusta lo que quieras mejorar, por ejemplo las indicaciones para PLANIA, y vuelve a generarla.';e.classList.add('show');e.style.background='var(--green-lt)';e.style.borderColor='var(--green-md)';e.style.color='var(--green-dk)';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+async function enviarSugerencia(){
+  const t=val('sug-txt');if(!t){accMsg('Escribe tu sugerencia.','err','sug-msg');return;}
+  const b=$('btn-sug');b.disabled=true;
+  try{await cuentaApi({accion:'sugerir',token:tk(),texto:t});$('sug-txt').value='';accMsg('Gracias. Recibimos tu sugerencia.','ok','sug-msg');}
+  catch(e){accMsg(e.message,'err','sug-msg');}
+  b.disabled=false;
+}
+
 async function iniciarSesion(){
   if(!tk()){pintarUsuario();return;}
   try{const j=await cuentaApi({accion:'estado',token:tk()});USR=j.usuario;}catch(e){if(e.status===401)setTk('');USR=null;}
@@ -989,7 +1163,7 @@ async function generar(){
   d.ins_marca=[...new Set([...d.inserciones,...(enMapa()&&mapaSel?SEC.filter(x=>x.sel).flatMap(x=>x.sel.n.map(y=>TIPO[y[0]][0])):[])])];
   const [periodos,minutos]=$('periodos').value.split('|');
   const errEl=$('err-msg');
-  errEl.classList.remove('show');
+  errEl.classList.remove('show');errEl.style.background='';errEl.style.borderColor='';errEl.style.color='';
 
   if(enMapa()&&!mapaSel){
     errEl.textContent='Elige la destreza en el buscador del currículo priorizado.';
@@ -1033,21 +1207,10 @@ async function generar(){
     setStep(3,'Construyendo tu planificación...');await sleep(500);
     setStep(4,'¡Lista!');await sleep(200);
 
-    $('res-meta').innerHTML=[
-      `<span class="mpill" style="background:#e8f5e8;color:#005700">${esc(d.subnivel)}</span>`,
-      `<span class="mpill" style="background:#f3e8fa;color:#6a0f8a">${esc(d.asignatura)}</span>`,
-      `<span class="mpill" style="background:#e6efff;color:#0000aa">${esc(d.grado)} · ${periodos} per. (${minutos} min)</span>`,
-      `<span class="mpill" style="background:#e8e7e2;color:#52524a">${d.secuencia}</span>`
-    ].join('');
-    $('res-tit').textContent=`PLANIA · ${plan.tema||d.tema}`;
-    const rubH=rubricaHTML(d,plan);
-    $('res-body').innerHTML=tablaHTML(d,plan)+(rubH?'<div class="rub-sep"></div>'+rubH:'');
-
+    HIST=null;
+    mostrarResultado(d,plan,`${periodos} per. (${minutos} min)`);
     pw.classList.remove('show');
     btn.disabled=false;btn.textContent='✦ Generar planificación con PLANIA';
-    document.querySelectorAll('.main > .card').forEach(c=>c.style.display='none');
-    $('res-wrap').classList.add('show');
-    window.scrollTo({top:0,behavior:'smooth'});
   }catch(err){
     pw.classList.remove('show');
     btn.disabled=false;btn.textContent='✦ Generar planificación con PLANIA';
@@ -1056,8 +1219,25 @@ async function generar(){
   }
 }
 
+// Muestra una planificación (recién generada o abierta desde el historial).
+function mostrarResultado(d,plan,tiempo){
+  $('res-meta').innerHTML=[
+    `<span class="mpill" style="background:#e8f5e8;color:#005700">${esc(d.subnivel)}</span>`,
+    `<span class="mpill" style="background:#f3e8fa;color:#6a0f8a">${esc(d.asignatura)}</span>`,
+    `<span class="mpill" style="background:#e6efff;color:#0000aa">${esc(d.grado)}${tiempo?' · '+esc(tiempo):''}</span>`,
+    `<span class="mpill" style="background:#e8e7e2;color:#52524a">${esc(d.secuencia)}</span>`
+  ].join('');
+  $('res-tit').textContent=`PLANIA · ${plan.tema||d.tema}`;
+  const rubH=rubricaHTML(d,plan);
+  $('res-body').innerHTML=tablaHTML(d,plan)+(rubH?'<div class="rub-sep"></div>'+rubH:'');
+  verVista('plan',true);
+  document.querySelectorAll('#v-plan > .card').forEach(c=>c.style.display='none');
+  $('res-wrap').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
 function nueva(){
-  document.querySelectorAll('.main > .card').forEach(c=>c.style.display='block');
+  document.querySelectorAll('#v-plan > .card').forEach(c=>c.style.display='block');
   $('res-wrap').classList.remove('show');
   aplicarModo();
   window.scrollTo({top:0,behavior:'smooth'});
