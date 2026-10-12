@@ -63,6 +63,25 @@ function vigencia(sub) {
   return 0;
 }
 
+// Roles: la administradora principal se define por correo y no se puede quitar desde el panel.
+const ADMINS = (process.env.PLANIA_ADMINS || "neirandrea10@gmail.com").split(",").map((x) => x.trim().toLowerCase()).filter(Boolean);
+const rolDe = (u) => (ADMINS.includes(u.email) ? "admin" : (u.rol === "admin" || u.rol === "colaborador" ? u.rol : "docente"));
+const esEquipo = (u) => rolDe(u) !== "docente";
+// Acceso regalado: por número de planificaciones o ilimitado por días.
+function regaloVigente(u) {
+  const g = u.regalo;
+  if (!g) return null;
+  if (g.tipo === "dias" && (g.hasta || 0) > Date.now()) return g;
+  if (g.tipo === "planes" && (g.restantes || 0) > 0) return g;
+  return null;
+}
+function estadoPlan(u) {
+  if (esEquipo(u)) return "equipo";
+  if ((u.paid_until || 0) > Date.now()) return "suscripcion";
+  if (regaloVigente(u)) return "regalo";
+  return "gratis";
+}
+
 const perfilCompleto = (u) => !!(u.perfil && (u.perfil_v || 0) >= PERFIL_V && (u.consent_v || 0) >= CONSENT_V);
 
 function publico(u) {
@@ -71,9 +90,38 @@ function publico(u) {
     email: u.email, nombre: u.nombre || "", uid: uid(u.email), usos: u.usos || 0, limite: LIMITE, precio: PRECIO,
     perfil_completo: perfilCompleto(u), perfil: u.perfil || null, consent_ok: (u.consent_v || 0) >= CONSENT_V,
     preferencias: u.preferencias || "",
-    suscripcion_activa: activa, vence: activa ? u.paid_until : 0,
+    rol: rolDe(u), estado: estadoPlan(u), regalo: regaloVigente(u),
+    suscripcion_activa: activa, vence: activa ? u.paid_until : 0, sub_cancelada: !!u.sub_cancelada,
     cobro_activo: paypalListo(),
     paypal: paypalListo() ? { client_id: process.env.PAYPAL_CLIENT_ID, plan_id: process.env.PAYPAL_PLAN_ID } : null,
+  };
+}
+
+function armarRegalo(tipo, cantidad, por) {
+  const n = Math.max(1, Math.min(tipo === "dias" ? 730 : 1000, parseInt(cantidad, 10) || 0));
+  const g = { tipo: tipo === "dias" ? "dias" : "planes", cantidad: n, desde: Date.now(), por: por || "" };
+  if (g.tipo === "dias") g.hasta = Date.now() + n * DIA; else g.restantes = n;
+  return g;
+}
+
+async function paypalCancelar(id) {
+  const auth = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`).toString("base64");
+  const tk = await fetch(`${paypalBase()}/v1/oauth2/token`, { method: "POST", headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" }, body: "grant_type=client_credentials" });
+  if (!tk.ok) throw new Error("No se pudo conectar con PayPal.");
+  const { access_token } = await tk.json();
+  const r = await fetch(`${paypalBase()}/v1/billing/subscriptions/${encodeURIComponent(id)}/cancel`, { method: "POST", headers: { Authorization: `Bearer ${access_token}`, "Content-Type": "application/json" }, body: JSON.stringify({ reason: "Cancelada a pedido del docente desde el panel de PLANIA" }) });
+  if (r.status !== 204 && r.status !== 422) throw new Error("PayPal no permitió cancelar la suscripción (" + r.status + ").");
+  return r.status;
+}
+
+// Resumen de una cuenta para el panel.
+function fila(u) {
+  const g = regaloVigente(u);
+  return {
+    email: u.email, nombre: u.nombre || "", creado: u.creado || "", ultimo_uso: u.ultimo_uso || "",
+    usos: u.usos || 0, total: u.total || u.usos || 0, rol: rolDe(u), estado: estadoPlan(u),
+    vence: (u.paid_until || 0) > Date.now() ? u.paid_until : 0, sub_id: u.sub_id || "", sub_cancelada: !!u.sub_cancelada,
+    regalo: g, perfil: u.perfil || null, usuario_id: uid(u.email), preferencias: u.preferencias || "", sugerencias: u.sugerencias || [],
   };
 }
 
@@ -87,7 +135,9 @@ async function usuarioDeToken(store, token) {
 
 // Revisa si la cuenta puede generar. Si tiene suscripción vencida en nuestros datos, la confirma con PayPal.
 async function acceso(store, u) {
+  if (esEquipo(u)) return { ok: true, u };
   if ((u.paid_until || 0) > Date.now()) return { ok: true, u };
+  if (regaloVigente(u)) return { ok: true, u };
   if (u.sub_id && paypalListo()) {
     try {
       const v = vigencia(await paypalSuscripcion(u.sub_id));
@@ -139,6 +189,8 @@ export default async (req) => {
       let u = await store.get("u/" + email, { type: "json" });
       if (!u) {
         u = { email, nombre: c.nombre || "", creado: new Date().toISOString(), usos: 0, paid_until: 0, sub_id: "", consent_v: c.acepta ? CONSENT_V : 0 };
+        const pendiente = await store.get("g/" + email, { type: "json" });
+        if (pendiente) { u.regalo = armarRegalo(pendiente.tipo, pendiente.cantidad, pendiente.por); await store.delete("g/" + email); }
         await store.setJSON("u/" + email, u);
         await hoja({ tipo: "usuario", fecha: u.creado, email, nombre: u.nombre, acepta: c.acepta ? "sí (v" + CONSENT_V + ")" : "no" }, 8000);
       }
@@ -158,7 +210,17 @@ export default async (req) => {
       return out(a.ok ? 200 : 402, { ok: a.ok, usuario: publico(a.u) });
     }
     if (accion === "consumir") {
-      u.usos = (u.usos || 0) + 1; u.ultimo_uso = new Date().toISOString();
+      // Solo se descuenta del cupo gratuito cuando no hay equipo, suscripción ni regalo vigente.
+      const est = estadoPlan(u);
+      u.total = (u.total || u.usos || 0) + 1; u.ultimo_uso = new Date().toISOString();
+      if (est === "regalo" && u.regalo.tipo === "planes") {
+        u.regalo.restantes = Math.max(0, (u.regalo.restantes || 0) - 1);
+        if (u.regalo.restantes === 1 && !u.regalo.avisado) {
+          u.regalo.avisado = true;
+          await hoja({ tipo: "aviso_regalo", email: u.email, nombre: u.nombre || "", detalle: "Te queda 1 planificación de tu acceso de regalo." }, 9000, "enviado");
+        }
+      }
+      else if (est === "gratis") u.usos = (u.usos || 0) + 1;
       if (typeof b.preferencias === "string") u.preferencias = txt(b.preferencias, 3000);
       await store.setJSON("u/" + u.email, u);
       // Historial: cada planificación queda guardada en la cuenta del docente.
@@ -215,6 +277,82 @@ export default async (req) => {
       return out(200, { ok: true });
     }
 
+    if (accion === "sugerir") {
+      const t = txt(b.texto, 1500);
+      if (!t) return out(400, { error: "Escribe tu sugerencia." });
+      u.sugerencias = (u.sugerencias || []).concat({ fecha: new Date().toISOString(), texto: t }).slice(-30);
+      await store.setJSON("u/" + u.email, u);
+      await hoja({ tipo: "sugerencia", fecha: new Date().toISOString(), usuario_id: uid(u.email), email: u.email, texto: t }, 8000);
+      return out(200, { ok: true });
+    }
+
+    // ---------- PANEL DE ADMINISTRACIÓN ----------
+    if (accion.startsWith("admin_")) {
+      const rol = rolDe(u);
+      if (rol === "docente") return out(403, { error: "No tienes permiso para entrar al panel." });
+      const soloAdmin = ["admin_rol", "admin_cancelar"].includes(accion);
+      if (soloAdmin && rol !== "admin") return out(403, { error: "Solo la administradora puede hacer esto." });
+
+      if (accion === "admin_lista") {
+        const { blobs } = await store.list({ prefix: "u/" });
+        const usuarios = [];
+        for (let i = 0; i < blobs.length; i += 25) {
+          const lote = await Promise.all(blobs.slice(i, i + 25).map((x) => store.get(x.key, { type: "json" }).catch(() => null)));
+          lote.filter(Boolean).forEach((x) => usuarios.push(fila(x)));
+        }
+        const pend = await store.list({ prefix: "g/" });
+        const pendientes = await Promise.all(pend.blobs.map(async (x) => Object.assign({ email: x.key.slice(2) }, await store.get(x.key, { type: "json" }))));
+        usuarios.sort((a, c) => String(c.creado).localeCompare(String(a.creado)));
+        return out(200, { yo: { email: u.email, rol }, usuarios, pendientes, limite: LIMITE });
+      }
+
+      const email = txt(b.email, 255).toLowerCase();
+      if (!correoOk(email)) return out(400, { error: "Correo no válido." });
+      const v = await store.get("u/" + email, { type: "json" });
+
+      if (accion === "admin_regalar") {
+        const tipo = b.tipo === "dias" ? "dias" : "planes";
+        const cantidad = parseInt(b.cantidad, 10);
+        if (!(cantidad > 0)) return out(400, { error: "Indica la cantidad de " + (tipo === "dias" ? "días." : "planificaciones.") });
+        if (!v) {
+          await store.setJSON("g/" + email, { tipo, cantidad, por: u.email, fecha: new Date().toISOString() });
+          await hoja({ tipo: "regalo", fecha: new Date().toISOString(), email, detalle: `${cantidad} ${tipo === "dias" ? "días ilimitados" : "planificaciones"} (pendiente de registro)`, por: u.email }, 8000);
+          return out(200, { ok: true, pendiente: true });
+        }
+        v.regalo = armarRegalo(tipo, cantidad, u.email);
+        await store.setJSON("u/" + email, v);
+        await hoja({ tipo: "regalo", fecha: new Date().toISOString(), email, detalle: `${cantidad} ${tipo === "dias" ? "días ilimitados" : "planificaciones"}`, por: u.email }, 8000);
+        return out(200, { ok: true, usuario: fila(v) });
+      }
+      if (accion === "admin_quitar_regalo") {
+        if (v) { delete v.regalo; await store.setJSON("u/" + email, v); }
+        await store.delete("g/" + email).catch(() => {});
+        return out(200, { ok: true });
+      }
+      if (!v) return out(404, { error: "Esa cuenta no existe." });
+      if (accion === "admin_rol") {
+        if (ADMINS.includes(email)) return out(400, { error: "La administradora principal no cambia de rol." });
+        v.rol = ["admin", "colaborador"].includes(b.rol) ? b.rol : "docente";
+        await store.setJSON("u/" + email, v);
+        return out(200, { ok: true, usuario: fila(v) });
+      }
+      if (accion === "admin_cancelar") {
+        if (!v.sub_id) return out(400, { error: "Esa cuenta no tiene una suscripción de PayPal registrada." });
+        await paypalCancelar(v.sub_id);
+        v.sub_cancelada = true; v.sub_cancelada_fecha = new Date().toISOString();
+        await store.setJSON("u/" + email, v);
+        await hoja({ tipo: "suscripcion", fecha: new Date().toISOString(), email, nombre: v.nombre, suscripcion: v.sub_id + " (CANCELADA desde el panel)", vence: v.paid_until ? new Date(v.paid_until).toISOString() : "" }, 8000);
+        return out(200, { ok: true, usuario: fila(v) });
+      }
+      if (accion === "admin_planes") {
+        // Planificaciones de una cuenta, para revisarlas o exportarlas.
+        const { blobs } = await store.list({ prefix: "h/" + email + "/" });
+        const planes = await Promise.all(blobs.slice(-200).map((x) => store.get(x.key, { type: "json" }).catch(() => null)));
+        return out(200, { planes: planes.filter(Boolean) });
+      }
+      return out(400, { error: "Acción no reconocida." });
+    }
+
     if (accion === "estado") {
       const a = await acceso(store, u);
       return out(200, { usuario: publico(a.u) });
@@ -228,7 +366,7 @@ export default async (req) => {
       if (dueno && dueno.email !== u.email) return out(400, { error: "Esa suscripción ya pertenece a otra cuenta." });
       const v = vigencia(await paypalSuscripcion(id));
       if (!v) return out(400, { error: "PayPal todavía no confirma el pago. Espera un minuto y vuelve a intentar." });
-      u.sub_id = id; u.paid_until = v;
+      u.sub_id = id; u.paid_until = v; u.sub_cancelada = false;
       await store.setJSON("u/" + u.email, u);
       await store.setJSON("p/" + id, { email: u.email });
       await hoja({ tipo: "suscripcion", fecha: new Date().toISOString(), email: u.email, nombre: u.nombre, suscripcion: id, vence: new Date(v).toISOString() }, 4000);
