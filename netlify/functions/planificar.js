@@ -122,6 +122,8 @@ exports.handler = async (event) => {
       "nivel_marzano": "${e[1]}",
       "tiempo": "minutos asignados a esta etapa",
       "pasos": ["paso 1 detallado", "paso 2", "paso 3", "paso 4", "paso 5"],
+      "preguntas": ["pregunta 1 textual", "pregunta 2", "pregunta 3"],
+      "material": "texto COMPLETO que el docente lee, escribe en la pizarra o entrega en esta etapa, mínimo 70 palabras",
       "representacion": "pauta del principio DUA Representación y cómo se aplica en esta etapa, mínimo 2 oraciones",
       "accion": "pauta del principio DUA Acción y expresión y cómo se aplica, mínimo 2 oraciones",
       "implicacion": "pauta del principio DUA Compromiso o implicación y cómo se aplica, mínimo 2 oraciones"
@@ -182,14 +184,15 @@ ${neeDatos}
 REGLAS OBLIGATORIAS:
 1. Todos los pasos inician con verbo en infinitivo.
 2. ACTIVIDADES REALES Y DETALLADAS: cada etapa tiene de 4 a 7 pasos en orden. Cada paso dice qué hace el docente y CÓMO lo hace, qué hacen los estudiantes, cómo se organizan, con qué material y qué producto se obtiene. Todo lo que el docente necesita decir o entregar va escrito completo dentro del paso: las preguntas, las consignas, el enunciado del problema, las reglas del juego, el texto breve original que se lee, los ejemplos y los datos. Prohibido escribir directrices vagas como "Explicar el tema", "Realizar una lluvia de ideas", "Plantear preguntas" o "Hacer una actividad" sin desarrollarlas.
-3. PREGUNTAS: cada vez que un paso use preguntas, escríbelas todas textualmente (de 3 a 5). Deben ser sobre todo inferenciales y crítico-valorativas: que el estudiante deduzca, relacione, justifique, opine con argumentos o valore. Como máximo una pregunta literal por paso.
+3. PREGUNTAS: cada etapa trae en "preguntas" de 3 a 5 preguntas escritas textualmente, las que el docente formula en esa etapa. Deben ser inferenciales (¿por qué crees que...?, ¿qué pasaría si...?, ¿qué relación hay entre...?) y crítico-valorativas (¿estás de acuerdo con...? ¿por qué?, ¿qué harías tú...?, ¿qué opinas de...?). Prohibidas las preguntas literales cuya respuesta se copia del texto, como "¿cuál es la idea principal?" o "¿qué menciona el autor?".
+3b. MATERIAL: cada etapa trae en "material" el contenido completo que el docente necesita, ya redactado y listo para usar: el texto, discurso, cuento o noticia que se lee (original, de 100 a 200 palabras cuando se pide leer o escuchar), el enunciado del problema con sus datos, las reglas del juego o del debate, el ejemplo modelado paso a paso, o el organizador gráfico con todo su contenido. Si un paso dice "leer", "presentar", "explicar" o "dar reglas", lo que se lee, presenta, explica o regula está escrito en "material". Nunca escribas "un discurso ficticio", "un texto breve" o "ejemplos" sin redactarlos.
 4. ${etInicio.toUpperCase()}: parte de una SITUACIÓN DE APRENDIZAJE escrita en "situacion_aprendizaje": un caso o escena concreta del contexto cercano del estudiante ecuatoriano de ${grado}, narrada en 4 a 7 líneas, que plantea un conflicto o una pregunta que la clase va a resolver. El primer paso de ${etInicio} presenta esa situación y los siguientes la exploran.
-5. ${etExplica.toUpperCase()}: siempre incluye la explicación del docente, coherente con la metodología, y con un recurso creativo que cambie según el tema (organizador gráfico construido en la pizarra con los estudiantes, demostración con material concreto, lectura guiada del libro con subrayado, analogía con algo cotidiano, dramatización, modelado paso a paso de un ejemplo, entre otros). Escribe las ideas clave que el docente explica, con su contenido real, y cómo queda el organizador o el ejemplo modelado.
+5. ${etExplica.toUpperCase()}: siempre incluye la explicación del docente, coherente con la metodología, y con un recurso creativo que cambie según el tema (organizador gráfico construido en la pizarra con los estudiantes, demostración con material concreto, lectura guiada del libro con subrayado, analogía con algo cotidiano, dramatización, modelado paso a paso de un ejemplo, entre otros). En el "material" de esta etapa escribe las ideas clave que el docente explica, con su contenido real (no solo los títulos), y cómo queda el organizador o el ejemplo modelado.
 6. METODOLOGÍA: ${metRegla}.
 7. INSERCIONES: ${insRegla}. Las inserciones van IMPLÍCITAS: se integran dentro de la situación de aprendizaje, los ejemplos, los problemas, los textos y las preguntas, de modo que el estudiante las trabaja sin que se anuncien. No crees momentos aparte para ellas ni las nombres dentro de los pasos.
-8. COMPETENCIAS: cada competencia de la lista se desarrolla de verdad en al menos un paso, según lo que exige el currículo priorizado: ${compTodas.length ? compTodas.map((c) => `${c}: ${EXIGE[c]}`).join(". ") : "no hay competencias marcadas"}. Al final del paso donde se cumple escribe su sigla entre paréntesis: (CC), (CM), (CD) o (CS). Usa solo las siglas de las competencias de la lista. La competencia digital solo se marca cuando el estudiante interactúa con una herramienta digital.
+8. COMPETENCIAS: cada competencia de la lista se desarrolla de verdad en al menos un paso, según lo que exige el currículo priorizado: ${compTodas.length ? compTodas.map((c) => `${c}: ${EXIGE[c]}`).join(". ") : "no hay competencias marcadas"}. Al final del paso donde se cumple escribe su sigla entre paréntesis: (CC), (CM), (CD) o (CS). Usa solo las siglas de las competencias de la lista. Las siglas de competencias no tienen relación con los códigos de las destrezas (CS.3.1.4 es una destreza de Estudios Sociales, no la competencia socioemocional). La competencia digital solo se marca cuando el estudiante interactúa con una herramienta digital.
 9. HERRAMIENTAS DIGITALES: ${digRegla}. ${casaRegla}.
-10. ${secundarias.length ? `TRANSVERSALIZACIÓN DE DESTREZAS: la destreza principal lleva el peso de la clase. Cada destreza secundaria se trabaja de forma integrada en al menos un paso, sin desviar el foco. Sus inserciones y competencias aparecen de forma más ligera. En "destrezas_transversales" indica en qué etapa y actividad se trabaja cada una` : `No hay destrezas secundarias: deja "destrezas_transversales" como lista vacía`}.
+10. ${secundarias.length ? `TRANSVERSALIZACIÓN DE DESTREZAS: la destreza principal lleva el peso de la clase. Cada destreza secundaria se integra usando su contenido como tema o contexto de los textos, problemas, ejemplos o del producto de la clase (por ejemplo, si la secundaria es de Estudios Sociales, el texto que se lee o el debate trata ese contenido), de modo que se trabaje de verdad en al menos un paso y no como una mención forzada. Sus inserciones y competencias aparecen de forma más ligera. En "destrezas_transversales" indica en qué etapa y actividad se trabaja cada una` : `No hay destrezas secundarias: deja "destrezas_transversales" como lista vacía`}.
 11. DESAGREGACIÓN DE LA DESTREZA: ${desagDocente ? 'el docente ya escribió la destreza desagregada; cópiala sin cambios en "destreza_desagregada" y planifica para ese alcance' : 'desagrega la destreza principal para lo que realmente se puede lograr en esta clase con este tema y este tiempo, manteniendo su estructura (habilidad + contenido + nivel de complejidad) y sin inventar códigos. Si ya es acotada, repítela'}.
 12. DESAGREGACIÓN DEL INDICADOR: en "indicador_desagregado" redacta el indicador elegido acotado a lo que se planificó en las actividades y estrategias de esta clase, con la estructura del indicador oficial (qué logra el estudiante, cómo lo demuestra y en qué contexto). La rúbrica responde a este indicador desagregado.
 13. TAXONOMÍA DE MARZANO: los verbos y la demanda cognitiva de cada etapa corresponden a su "nivel_marzano" (Recuperación: reconocer, recordar, ejecutar. Comprensión: integrar, simbolizar. Análisis: comparar, clasificar, analizar errores, generalizar, especificar. Utilización del conocimiento: tomar decisiones, resolver problemas, experimentar, investigar).
@@ -218,7 +221,9 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
     { "nombre": "recurso con su cantidad", "detalle": "cómo se prepara o se usa en la clase", "busqueda": "palabras para buscar material de apoyo, o cadena vacía" }
   ],
   "rubrica": [
-    { "criterio": "criterio de evaluación", "dar": "descriptor de Domina los aprendizajes requeridos", "aar": "descriptor de Alcanza los aprendizajes requeridos", "paar": "descriptor de Está próximo a alcanzar los aprendizajes requeridos", "naar": "descriptor de No alcanza los aprendizajes requeridos" }
+    { "criterio": "criterio 1", "dar": "descriptor de Domina los aprendizajes requeridos", "aar": "descriptor de Alcanza los aprendizajes requeridos", "paar": "descriptor de Está próximo a alcanzar los aprendizajes requeridos", "naar": "descriptor de No alcanza los aprendizajes requeridos" },
+    { "criterio": "criterio 2", "dar": "...", "aar": "...", "paar": "...", "naar": "..." },
+    { "criterio": "criterio 3", "dar": "...", "aar": "...", "paar": "...", "naar": "..." }
   ],
   "tecnica": "técnica de evaluación apropiada para el subnivel",
   "instrumento": "instrumento de evaluación apropiado para el subnivel"${neeJson}
@@ -227,11 +232,11 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) return { statusCode: 500, headers, body: JSON.stringify({ error: "API key no configurada en el servidor." }) };
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const llamar = (model) => fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model,
         max_tokens: 10000,
         temperature: 0.7,
         response_format: { type: "json_object" },
@@ -241,6 +246,9 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
         ]
       }),
     });
+    // gpt-4.1 sigue mejor las instrucciones largas; si la cuenta no lo tiene, se usa gpt-4o.
+    let response = await llamar(process.env.PLANIA_MODELO || "gpt-4.1");
+    if (!response.ok && [400, 403, 404].includes(response.status)) response = await llamar("gpt-4o");
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
@@ -262,6 +270,15 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
     }));
     if (!secundarias.length) plan.destrezas_transversales = [];
     if (!(digitales === "no" && compTodas.includes("digital"))) plan.tarea_casa = null;
+    // Quita las siglas de competencias que no corresponden a esta planificación.
+    const validas = new Set(compTodas.map((c) => SIGLA[c]));
+    const limpiaSiglas = (t) => typeof t === "string" ? t.replace(/\s*\((CC|CM|CD|CS)\)/g, (m, g) => (validas.has(g) ? ` (${g})` : "")) : t;
+    if (plan.etapas && typeof plan.etapas === "object") Object.values(plan.etapas).forEach((e) => {
+      if (e && Array.isArray(e.pasos)) e.pasos = e.pasos.map(limpiaSiglas);
+      if (e && Array.isArray(e.preguntas)) e.preguntas = e.preguntas.map(limpiaSiglas);
+      if (e && typeof e.material === "string") e.material = limpiaSiglas(e.material);
+    });
+    if (plan.tarea_casa && plan.tarea_casa.consigna) plan.tarea_casa.consigna = limpiaSiglas(plan.tarea_casa.consigna);
     plan.origen_destreza = deMapa ? "mapa" : "manual";
     if (deMapa) { plan.codigo_destreza = txt(b.codigo, 20); plan.criterio = txt(b.criterio, 20); }
     if (desagDocente) plan.destreza_desagregada = desagDocente;
