@@ -73,6 +73,7 @@ async function procesar(event) {
     const subnivel = txt(b.subnivel, 80), asignatura = txt(b.asignatura, 80), grado = txt(b.grado, 60);
     const periodos = txt(b.periodos, 30), minutos = txt(b.minutos, 30);
     const secuencia = b.secuencia === "ACC" ? "ACC" : "ERCA";
+    const idioma = ["bilingue","ingles"].includes(b.idioma) ? b.idioma : "español";
     const destreza = txt(b.destreza, 1200), indicador = txt(b.indicador, 1500), tema = txt(b.tema, 200);
     const ejes = limpiaEjes(b.ejes);
     const deMapa = b.origen_destreza === "mapa";
@@ -218,6 +219,8 @@ REGLAS OBLIGATORIAS:
 14. Cada etapa tiene sus tres principios DUA detallados. Distribuye el tiempo de modo que la suma sea exactamente ${minutos}. Genera el objetivo coherente con la destreza y el tema. Redacción humanizada y pedagógicamente sólida.
 15. RECURSOS: detalla cada recurso con cantidad y cómo se prepara o se usa. Si un recurso se beneficia de material de apoyo en internet, escribe en "busqueda" las palabras exactas para encontrarlo. NO escribas direcciones web. RÚBRICA: de 3 a 4 criterios derivados del indicador desagregado y de las actividades, con descriptores observables y distintos en cada nivel de la escala ecuatoriana.${preferencias ? `
 15b. INDICACIONES DEL DOCENTE: respeta sus preferencias y usa el contenido de su libro como base de textos, ejemplos y ejercicios, siempre que no contradigan el currículo ni estas reglas.` : ""}${neeReglas}
+
+${idioma === "bilingue" ? "IDIOMA: genera todo el contenido pedagógico en español Y también en inglés: escribe cada actividad, pregunta y material en ambos idiomas (primero español, luego inglés)." : idioma === "ingles" ? "IDIOMA: genera todo el contenido pedagógico completamente en inglés." : ""}
 
 Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin texto adicional):
 {

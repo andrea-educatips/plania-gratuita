@@ -9,7 +9,7 @@
 :root{
   --green:#008000;--green-dk:#005c00;--green-lt:#e8f5e8;--green-md:#b8ddb8;
   --purple:#951abe;--purple-lt:#f3e8fa;--purple-dk:#6a0f8a;
-  --blue:#0000cc;--blue-lt:#e6efff;
+  --blue:#0000cc;--blue-lt:#e6efff;--teal:#0d7a6b;--teal-lt:#e0f5f2;
   --gold:#b8860b;--gold-lt:#fef8e7;
   --gray:#f6f6f3;--gray2:#e8e7e2;--gray3:#c0bfba;
   --text:#18180f;--text2:#52524a;--text3:#8a8a80;
@@ -89,6 +89,31 @@ textarea{resize:vertical;min-height:72px;line-height:1.6}
 .nee-prev-item{background:var(--white);border:1px solid var(--gray2);border-radius:var(--radius-sm);padding:.75rem;margin-bottom:8px}
 .nee-prev-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:.3rem}
 .nee-prev-desc{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* FORMATO SELECTOR */
+.fmt-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:560px){.fmt-grid{grid-template-columns:1fr}}
+.fmt-btn{padding:12px 8px;border:2px solid var(--gray3);border-radius:var(--radius-sm);background:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;text-align:center;transition:all .2s;line-height:1.4}
+.fmt-btn:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-lt)}
+.fmt-btn.on{border-color:var(--teal);color:var(--teal);background:var(--teal-lt);font-weight:600}
+.fmt-sub{font-size:10px;display:block;margin-top:2px;color:var(--text3);font-weight:400}
+.fmt-btn.on .fmt-sub{color:var(--teal)}
+.upload-wrap{display:none;margin-top:.9rem}
+.upload-wrap.show{display:block}
+.upload-area{border:2px dashed var(--gray3);border-radius:var(--radius-sm);padding:1.2rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--white)}
+.upload-area:hover,.upload-area.drag{border-color:var(--teal);background:var(--teal-lt)}
+.upload-area input[type=file]{display:none}
+.upload-lbl{font-size:13px;color:var(--text3);line-height:1.6}
+.upload-lbl strong{color:var(--teal)}
+.upload-ok{font-size:12px;color:var(--teal);font-weight:600;margin-top:6px;display:none}
+.upload-ok.show{display:block}
+/* IDIOMA SELECTOR */
+.idioma-wrap{display:none;margin-top:.9rem;padding:.9rem;background:var(--blue-lt);border:1.5px solid var(--blue);border-radius:var(--radius-sm)}
+.idioma-wrap.show{display:block}
+.idioma-lbl{font-size:12px;font-weight:600;color:var(--blue);margin-bottom:.6rem}
+.idioma-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.idioma-btn{padding:9px 6px;border:1.5px solid var(--blue);border-radius:var(--radius-sm);background:var(--white);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--blue);cursor:pointer;text-align:center;transition:all .2s}
+.idioma-btn.on{background:var(--blue);color:white;font-weight:600}
 
 .btn-gen{width:100%;padding:15px;background:var(--green);color:white;border:none;border-radius:var(--radius);font-family:'Playfair Display',serif;font-size:18px;cursor:pointer;transition:background .2s;margin-top:.4rem}
 .btn-gen:hover{background:var(--green-dk)}
@@ -435,7 +460,7 @@ textarea[readonly]{background:var(--gray)}
       </div>
       <div class="field">
         <label>Asignatura <span class="req">*</span></label>
-        <select id="asignatura">
+        <select id="asignatura" onchange="checkIdiomaVisible()">
           <option value="">Selecciona la asignatura</option>
           <option>Lengua y Literatura</option><option>Matemática</option>
           <option>Ciencias Naturales</option><option>Estudios Sociales</option>
@@ -647,6 +672,36 @@ textarea[readonly]{background:var(--gray)}
   </div>
 </div>
 
+<!-- FORMATO DE SALIDA -->
+<div class="card">
+  <div class="card-hdr"><div class="card-icon ic-b">📄</div><div><div class="card-title">Formato de salida</div><div class="card-sub">Elige cómo deseas recibir tu planificación</div></div></div>
+  <div class="card-body">
+    <div class="fmt-grid">
+      <button class="fmt-btn on" data-fmt="A" onclick="selFormato(this)">📊 Tabla A<span class="fmt-sub">ERCA/ACC + DUA · Formato PLANIA</span></button>
+      <button class="fmt-btn" data-fmt="B" onclick="selFormato(this)">📋 Tabla B<span class="fmt-sub">CAI · Formato muy usado en Ecuador</span></button>
+      <button class="fmt-btn" data-fmt="institucional" onclick="selFormato(this)">🏫 Formato institucional<span class="fmt-sub">Sube tu propio formato Word</span></button>
+    </div>
+    <div class="upload-wrap" id="upload-wrap">
+      <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Sube el formato Word de tu institución <span class="req">*</span></label>
+      <div class="upload-area" id="upload-area" onclick="document.getElementById('formato-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+        <input type="file" id="formato-file" accept=".docx,.doc" onchange="handleFileSelect(this)">
+        <div class="upload-lbl">📎 <strong>Haz clic para subir</strong> o arrastra aquí<br>Formato Word (.docx) · PLANIA rellenará tu plantilla</div>
+        <div class="upload-ok" id="upload-ok">✅ Archivo cargado</div>
+      </div>
+      <p class="hint" style="margin-top:6px">El archivo no se almacena permanentemente. Se usa solo para esta generación.</p>
+    </div>
+    <!-- IDIOMA (solo visible cuando asignatura = Inglés) -->
+    <div class="idioma-wrap" id="idioma-wrap">
+      <div class="idioma-lbl">🌐 Idioma de la planificación (Inglés)</div>
+      <div class="idioma-grid">
+        <button class="idioma-btn on" data-idioma="español" onclick="selIdioma(this)">🇪🇸 Solo español</button>
+        <button class="idioma-btn" data-idioma="bilingue" onclick="selIdioma(this)">🇪🇸🇬🇧 Bilingüe</button>
+        <button class="idioma-btn" data-idioma="ingles" onclick="selIdioma(this)">🇬🇧 Solo inglés</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- GENERAR -->
 <div class="card" id="s-gen">
   <div class="card-body">
@@ -726,6 +781,48 @@ const val=id=>$(id).value.trim();
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let planId='';
 let ult=null;
+// ---------- FORMATO / IDIOMA ----------
+let formatoSalida='A';
+let idiomaSeleccionado='español';
+let formatoFile=null;
+function selFormato(btn){
+  document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  formatoSalida=btn.dataset.fmt;
+  const uw=$('upload-wrap');
+  if(formatoSalida==='institucional'){uw.classList.add('show');}else{uw.classList.remove('show');}
+}
+function selIdioma(btn){
+  document.querySelectorAll('.idioma-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  idiomaSeleccionado=btn.dataset.idioma;
+}
+function handleFileSelect(input){
+  if(input.files&&input.files[0]){
+    formatoFile=input.files[0];
+    $('upload-ok').textContent='✅ '+formatoFile.name;
+    $('upload-ok').classList.add('show');
+  }
+}
+function handleDrop(e){
+  e.preventDefault();
+  $('upload-area').classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f&&(f.name.endsWith('.docx')||f.name.endsWith('.doc'))){
+    formatoFile=f;
+    $('upload-ok').textContent='✅ '+f.name;
+    $('upload-ok').classList.add('show');
+  }
+}
+function checkIdiomaVisible(){
+  const asig=val('asignatura')||'';
+  const iw=$('idioma-wrap');
+  if(asig.toLowerCase().includes('inglés')||asig.toLowerCase().includes('ingles')){
+    iw.classList.add('show');
+  }else{
+    iw.classList.remove('show');
+  }
+}
 // ---------- CUENTA ----------
 let USR=null;
 const tk=()=>{try{return localStorage.getItem('plania_token')||'';}catch(e){return '';}};
@@ -1276,6 +1373,12 @@ async function generar(){
   if(SEC.some(x=>!x.sel)){errEl.textContent='Elige la destreza secundaria o quita el espacio vacío.';errEl.classList.add('show');return;}
   if(!d.tema) d.tema=d.destreza.split('.')[0].trim().substring(0,55);
 
+  // Validar formato institucional
+  if(formatoSalida==='institucional'&&!formatoFile){
+    errEl.textContent='Sube el formato Word de tu institución para continuar.';
+    errEl.classList.add('show');return;
+  }
+
   const btn=$('btn-gen');
   btn.disabled=true;btn.textContent='PLANIA está generando...';
   const pw=$('prog-wrap');pw.classList.add('show');
@@ -1285,7 +1388,7 @@ async function generar(){
 
   try{
     // El nombre del docente, el paralelo y las fechas se usan solo en el documento. No se envían ni se guardan.
-    const envio=Object.assign({},d,{periodos:`${periodos} período${periodos>1?'s':''}`,minutos:`${minutos} minutos`,anon_id:getAnon(),token:tk()});
+    const envio=Object.assign({},d,{periodos:`${periodos} período${periodos>1?'s':''}`,minutos:`${minutos} minutos`,anon_id:getAnon(),token:tk(),formato:formatoSalida,idioma:idiomaSeleccionado});
     delete envio.docente;delete envio.paralelo;delete envio.fecha_inicio;delete envio.fecha_fin;
     const resp=await generarEnFondo(envio);
     const data=resp.data;
@@ -1338,6 +1441,43 @@ function nueva(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
+function tablaB_HTML(d,plan){
+  const h=(t,span)=>`<td class="h"${span?` colspan="${span}"`:''}>${esc(t)}</td>`;
+  const cell=t=>`<td>${t||''}</td>`;
+  // Encabezado institucional
+  let html='<table><tr>'+h('Institución',2)+h('Docente',2)+h('Área',2)+'</tr><tr>'
+    +cell(esc(d.institucion||''))+cell('')+cell(esc(d.docente||''))+cell('')+cell(esc(d.area||''))+cell('')+'</tr>'
+    +'<tr>'+h('Asignatura',2)+h('Grado',2)+h('Período lectivo',2)+'</tr><tr>'
+    +cell(esc(d.asignatura||''))+cell('')+cell(esc(d.grado||''))+cell('')+cell(esc(d.periodo_lectivo||''))+cell('')+'</tr>'
+    +'<tr>'+h('Unidad',2)+h('Título de la unidad',2)+h('Fecha',2)+'</tr><tr>'
+    +cell(esc(d.unidad||''))+cell('')+cell(esc(d.titulo_unidad||''))+cell('')+cell(esc((d.fecha_inicio||'')+(d.fecha_fin?' al '+d.fecha_fin:'')))+cell('')+'</tr>'
+    +'<tr>'+h('Destreza con criterio de desempeño',6)+'</tr><tr><td colspan="6">'+esc(d.destreza||'')+'</td></tr>';
+  // Cuerpo CAI
+  html+='<tr>'+h('Destreza')+h('Indicador de evaluación')+h('Estrategia metodológica activa')+h('Recursos')+h('Evaluación')+'</tr>';
+  const filas=Array.isArray(plan.sesiones)?plan.sesiones:[];
+  if(filas.length){
+    filas.forEach(s=>{
+      html+='<tr>'
+        +cell(esc(s.destreza||d.destreza||''))
+        +cell(esc(s.indicador||d.indicador||''))
+        +cell(Array.isArray(s.actividades)?s.actividades.map(a=>`<p>${esc(a)}</p>`).join(''):esc(s.actividades||s.estrategia||''))
+        +cell(Array.isArray(s.recursos)?s.recursos.map(r=>`<p>${esc(r)}</p>`).join(''):esc(s.recursos||''))
+        +cell(esc(s.evaluacion||s.cierre||''))
+        +'</tr>';
+    });
+  }else{
+    html+='<tr>'
+      +cell(esc(d.destreza||''))
+      +cell(esc(d.indicador||plan.indicador||''))
+      +cell(Array.isArray(plan.actividades_desarrollo)?plan.actividades_desarrollo.map(a=>`<p>${esc(a)}</p>`).join(''):esc(plan.actividades_desarrollo||''))
+      +cell(Array.isArray(plan.recursos)?plan.recursos.map(r=>`<p>${esc(r)}</p>`).join(''):esc(plan.recursos||''))
+      +cell(esc(plan.evaluacion||''))
+      +'</tr>';
+  }
+  html+='</table>';
+  return html;
+}
+
 function descargarWord(){
   if(!ult)return;
   enviarEvento('descarga_word');
@@ -1345,14 +1485,18 @@ function descargarWord(){
     +'body{font-family:Arial,sans-serif;font-size:9pt}table{border-collapse:collapse;width:100%}'
     +'td{border:1px solid #000;padding:4px 5px;vertical-align:top;font-family:Arial,sans-serif;font-size:9pt}'
     +'td.h{background:#d9ead3;font-weight:bold;text-align:center;vertical-align:middle}p{margin:0 0 5pt 0}ol{margin:0 0 5pt 14pt;padding:0}.x{font-size:12pt}.sit-box{background:#eef3ff;padding:3pt}';
+  const bodyContent=formatoSalida==='B'
+    ?tablaB_HTML(ult.d,ult.plan)
+    :(tablaHTML(ult.d,ult.plan)+(rubricaHTML(ult.d,ult.plan)?'<br clear="all" style="page-break-before:always">'+rubricaHTML(ult.d,ult.plan):''));
   const doc='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Planificación</title>'
     +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
-    +'<style>'+css+'</style></head><body><div class="WordSection1">'+tablaHTML(ult.d,ult.plan)+(rubricaHTML(ult.d,ult.plan)?'<br clear="all" style="page-break-before:always">'+rubricaHTML(ult.d,ult.plan):'')
+    +'<style>'+css+'</style></head><body><div class="WordSection1">'+bodyContent
     +'<p style="font-size:8pt;color:#666;margin-top:8pt">Generado por PLANIA · Andrea Educatips</p></div></body></html>';
   const blob=new Blob(['﻿',doc],{type:'application/msword'});
   const a=document.createElement('a');
   const nombre=(ult.plan.tema||ult.d.tema||'clase').replace(/[^\wáéíóúñÁÉÍÓÚÑ ]+/g,'').trim().slice(0,40).replace(/\s+/g,'_');
-  a.href=URL.createObjectURL(blob);a.download=`Planificacion_PLANIA_${nombre||'clase'}.doc`;
+  const sufijo=formatoSalida==='B'?'_TablaB':'';
+  a.href=URL.createObjectURL(blob);a.download=`Planificacion_PLANIA${sufijo}_${nombre||'clase'}.doc`;
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),2000);
 }
