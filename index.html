@@ -689,7 +689,6 @@ nav {
 /* ── HERO DIVIDIDO ── */
 .hero {
   padding-block: 56px 48px;
-  overflow: hidden;
 }
 .hero-inner {
   display: grid;
@@ -1433,12 +1432,6 @@ footer strong { color: #fff; }
   <div class="usr" id="usr"></div>
 </header>
 
-<nav class="nav-niveles">
->
-  <a href="index.html" class="active">EGB</a>
-  <a href="inicial.html">Inicial</a>
-
-</nav>
 
 <div class="banner" id="banner">✦ Regístrate con tu correo y genera tus primeras planificaciones sin costo.</div>
 
@@ -1545,17 +1538,19 @@ footer strong { color: #fff; }
   <div class="lat-card" id="lat-perfil"></div>
   <div class="lat-card">
     <div class="menu" id="menu">
-      <button class="mi on" data-v="plan">📋 Planificación por destrezas<br>Elemental a Bachillerato</button>
+      <div class="menu-t">Niveles</div>
+      <a class="mi" href="inicial.html" style="text-decoration:none;display:block">🌱 Inicial <span class="tag" style="background:#E9E4F2;color:#6E1290">Nuevo</span></a>
+      <button class="mi prox" data-v="prox" data-m="Planificación de Preparatoria">Preparatoria <span class="tag">Pronto</span></button>
+      <button class="mi on" data-v="plan">Elemental a Bachillerato</button>
+      <button class="mi prox" data-v="prox" data-m="Planificación de Bachillerato Técnico">Bachillerato Técnico <span class="tag">Pronto</span></button>
+      <div class="menu-t">Multigrado</div>
+      <button class="mi prox" data-v="prox" data-m="Planificación multigrado por destrezas">Por destrezas <span class="tag">Pronto</span></button>
+      <button class="mi prox" data-v="prox" data-m="Planificación multigrado por competencias">Por competencias <span class="tag">Pronto</span></button>
+      <div class="menu-t">Intercultural</div>
+      <button class="mi prox" data-v="prox" data-m="Planificación MOSEIB">MOSEIB <span class="tag">Pronto</span></button>
+      <div class="menu-t">Mi cuenta</div>
       <button class="mi" data-v="hist">🗂️ Mis planificaciones</button>
       <button class="mi" data-v="sug">💡 Sugerencias</button>
-      <div class="menu-t">Otros niveles</div>
-      <a class="mi" href="inicial.html" style="text-decoration:none;display:block">🌱 Educación Inicial <span class="tag" style="background:#E9E4F2;color:#6E1290">Nuevo</span></a>
-      <div class="menu-t">Próximamente</div>
-      <button class="mi prox" data-v="prox" data-m="Planificación de Preparatoria">Preparatoria <span class="tag">Pronto</span></button>
-      <button class="mi prox" data-v="prox" data-m="Planificación de Bachillerato Técnico">Bachillerato Técnico <span class="tag">Pronto</span></button>
-      <button class="mi prox" data-v="prox" data-m="Planificación por competencias (pilotaje)">Por competencias (pilotaje) <span class="tag">Pronto</span></button>
-      <button class="mi prox" data-v="prox" data-m="Planificación para escolaridad inconclusa">Escolaridad inconclusa <span class="tag">Pronto</span></button>
-      <button class="mi prox" data-v="prox" data-m="Planificación multigrado">Multigrado <span class="tag">Pronto</span></button>
     </div>
   </div>
 </aside>
