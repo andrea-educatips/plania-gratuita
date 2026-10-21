@@ -157,12 +157,19 @@ body{
   margin-bottom:.5rem;
 }
 
+/* ─── NAV NIVELES ─── */
+nav.nav-niveles{background:#fff;border-bottom:2px solid var(--cuadricula);display:flex;gap:.5rem;padding:.6rem 1.5rem;overflow-x:auto}
+nav.nav-niveles a{text-decoration:none;color:#6E1290;font-weight:700;font-size:.85rem;padding:.4rem .8rem;border-radius:6px;white-space:nowrap;transition:.2s;font-family:inherit}
+nav.nav-niveles a:hover,nav.nav-niveles a.active{background:#E9E4F2;color:#6E1290}
+
 /* ─── ACCESO (auth section) ─── */
 .acceso{
   max-width:520px;
   margin:1.5rem auto;
   padding:0 1.25rem;
+  display:none;
 }
+.acceso.show{display:block}
 
 /* ─── CARDS ─── */
 .card{
@@ -595,6 +602,11 @@ footer a{color:var(--morado);text-decoration:underline;margin:0 .5rem}
   <div class="usr" id="usr"></div>
 </header>
 
+<nav class="nav-niveles">
+  <a href="index.html" class="active">EGB</a>
+  <a href="inicial.html">Inicial</a>
+</nav>
+
 <div class="banner" id="banner">✦ Regístrate con tu correo y genera tus primeras planificaciones sin costo.</div>
 
 <div class="hero" id="hero">
@@ -710,8 +722,10 @@ footer a{color:var(--morado);text-decoration:underline;margin:0 .5rem}
       <button class="mi on" data-v="plan">📋 Planificación por destrezas<br>Elemental a Bachillerato</button>
       <button class="mi" data-v="hist">🗂️ Mis planificaciones</button>
       <button class="mi" data-v="sug">💡 Sugerencias</button>
+      <div class="menu-t">Otros niveles</div>
+      <a class="mi" href="inicial.html" style="text-decoration:none;display:block">🌱 Educación Inicial <span class="tag" style="background:#E9E4F2;color:#6E1290">Nuevo</span></a>
       <div class="menu-t">Próximamente</div>
-      <button class="mi prox" data-v="prox" data-m="Planificación Inicial y Preparatoria">Inicial y Preparatoria <span class="tag">Pronto</span></button>
+      <button class="mi prox" data-v="prox" data-m="Planificación de Preparatoria">Preparatoria <span class="tag">Pronto</span></button>
       <button class="mi prox" data-v="prox" data-m="Planificación de Bachillerato Técnico">Bachillerato Técnico <span class="tag">Pronto</span></button>
       <button class="mi prox" data-v="prox" data-m="Planificación por competencias (pilotaje)">Por competencias (pilotaje) <span class="tag">Pronto</span></button>
       <button class="mi prox" data-v="prox" data-m="Planificación para escolaridad inconclusa">Escolaridad inconclusa <span class="tag">Pronto</span></button>
