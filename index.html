@@ -1909,36 +1909,10 @@ function mostrarLandingOApp() {
   const autenticado = !!USR;
   const landingEl = document.getElementById('landing-section');
   const appEl = document.getElementById('app-section');
-  // La landing SIEMPRE está visible.
-  // El auth-card cambia: si hay sesión muestra bienvenida + botón a la app;
-  // si no hay sesión muestra los tabs de login/registro.
-  if (landingEl) landingEl.style.display = 'block';
+  // Landing: solo visible cuando NO hay sesión
+  if (landingEl) landingEl.style.display = autenticado ? 'none' : 'block';
+  // App: solo visible cuando HAY sesión
   if (appEl) appEl.style.display = autenticado ? 'block' : 'none';
-
-  // Cambiar el auth-card según estado
-  const authCard = document.getElementById('auth-card');
-  if (authCard) {
-    if (autenticado) {
-      // Mostrar panel de bienvenida con acceso directo a la app
-      const nombre = USR.nombre ? USR.nombre.split(' ')[0] : 'Profe';
-      authCard.innerHTML = `
-        <div class="auth-card-hdr">
-          <div class="bungee">¡Hola, ${esc(nombre)}!</div>
-          <div class="sub">Tu cuenta está activa</div>
-        </div>
-        <div style="padding:24px;text-align:center">
-          <p style="font-size:15px;color:var(--tinta2);margin-bottom:20px">
-            Ya tienes sesión iniciada en PLANIA.<br>Accede a tu planificador ahora.
-          </p>
-          <button class="btn-full" onclick="document.getElementById('app-section').scrollIntoView({behavior:'smooth'})">
-            Ir a mi planificador →
-          </button>
-          <div style="margin-top:12px">
-            <span class="acc-link" onclick="cerrarSesion()">Cerrar sesión</span>
-          </div>
-        </div>`;
-    }
-  }
 }
 
 
