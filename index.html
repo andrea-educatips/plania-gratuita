@@ -677,9 +677,9 @@ textarea[readonly]{background:var(--gray)}
   <div class="card-hdr"><div class="card-icon ic-b">📄</div><div><div class="card-title">Formato de salida</div><div class="card-sub">Elige cómo deseas recibir tu planificación</div></div></div>
   <div class="card-body">
     <div class="fmt-grid">
-      <button class="fmt-btn on" data-fmt="A" onclick="selFormato(this)">📊 Tabla A<span class="fmt-sub">ERCA/ACC + DUA · Formato PLANIA</span></button>
-      <button class="fmt-btn" data-fmt="B" onclick="selFormato(this)">📋 Tabla B<span class="fmt-sub">CAI · Formato muy usado en Ecuador</span></button>
-      <button class="fmt-btn" data-fmt="institucional" onclick="selFormato(this)">🏫 Formato institucional<span class="fmt-sub">Sube tu propio formato Word</span></button>
+      <button class="fmt-btn on" data-fmt="A" onclick="selFormato(this)">📊 Tabla A<span class="fmt-sub">Formato Andrea Educatips · ERCA/ACC + DUA</span></button>
+      <button class="fmt-btn" data-fmt="B" onclick="selFormato(this)">📋 Tabla B<span class="fmt-sub">Formato Ministerial · Estructura oficial</span></button>
+      <button class="fmt-btn" data-fmt="institucional" onclick="selFormato(this)">🏫 Tabla C<span class="fmt-sub">Formato Institucional · Sube tu formato Word</span></button>
     </div>
     <div class="upload-wrap" id="upload-wrap">
       <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Sube el formato Word de tu institución <span class="req">*</span></label>
@@ -1444,7 +1444,7 @@ function nueva(){
 function tablaB_HTML(d,plan){
   const h=(t,span)=>`<td class="h"${span?` colspan="${span}"`:''}>${esc(t)}</td>`;
   const cell=t=>`<td>${t||''}</td>`;
-  // Encabezado institucional
+  // Encabezado Tabla C (Formato Institucional)
   let html='<table><tr>'+h('Institución',2)+h('Docente',2)+h('Área',2)+'</tr><tr>'
     +cell(esc(d.institucion||''))+cell('')+cell(esc(d.docente||''))+cell('')+cell(esc(d.area||''))+cell('')+'</tr>'
     +'<tr>'+h('Asignatura',2)+h('Grado',2)+h('Período lectivo',2)+'</tr><tr>'
@@ -1452,7 +1452,7 @@ function tablaB_HTML(d,plan){
     +'<tr>'+h('Unidad',2)+h('Título de la unidad',2)+h('Fecha',2)+'</tr><tr>'
     +cell(esc(d.unidad||''))+cell('')+cell(esc(d.titulo_unidad||''))+cell('')+cell(esc((d.fecha_inicio||'')+(d.fecha_fin?' al '+d.fecha_fin:'')))+cell('')+'</tr>'
     +'<tr>'+h('Destreza con criterio de desempeño',6)+'</tr><tr><td colspan="6">'+esc(d.destreza||'')+'</td></tr>';
-  // Cuerpo CAI
+  // Cuerpo Tabla B (Formato Ministerial)
   html+='<tr>'+h('Destreza')+h('Indicador de evaluación')+h('Estrategia metodológica activa')+h('Recursos')+h('Evaluación')+'</tr>';
   const filas=Array.isArray(plan.sesiones)?plan.sesiones:[];
   if(filas.length){
