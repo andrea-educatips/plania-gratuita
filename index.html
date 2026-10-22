@@ -1707,12 +1707,6 @@ footer strong { color: #fff; }
   </div>
 </div>
 
-<!-- LO QUE MARCA EL CURRÍCULO -->
-<div class="card" id="s-mapa" style="display:none">
-  <div class="card-hdr"><div class="card-icon ic-b">🔗</div><div><div class="card-title">Competencias e inserciones de esta destreza</div><div class="card-sub">Las define el currículo priorizado con énfasis en competencias. Se aplican de forma automática</div></div></div>
-  <div class="card-body"><div class="mapa-info" id="mapa-info">Elige una destreza para ver sus competencias e inserciones curriculares.</div></div>
-</div>
-
 <!-- COMPETENCIAS -->
 <div class="card" id="s-comp">
   <div class="card-hdr"><div class="card-icon ic-p">🎯</div><div><div class="card-title">Énfasis en competencias</div><div class="card-sub">Selecciona una o varias</div></div></div>
@@ -2278,7 +2272,6 @@ function aplicarModo(){
   const m=enMapa(),oculto=$('res-wrap').classList.contains('show');
   $('mapa-box').classList.toggle('show',m);
   if(oculto)return;
-  $('s-mapa').style.display=m?'block':'none';
   $('s-comp').style.display=m?'none':'block';
   $('s-ins').style.display=m?'none':'block';
   $('s-sec').style.display=m?'block':'none';
@@ -2541,7 +2534,7 @@ async function generar(){
   const d={
     subnivel:$('subnivel').value,asignatura:$('asignatura').value,grado:val('grado'),
     destreza:val('destreza'),indicador:val('indicador'),tema:val('tema'),
-    trimestre:$('trimestre').value,institucion:val('institucion'),docente:val('docente'),area:val('area'),
+    trimestre:$('trimestre').value,institucion:val('institucion'),docente:val('docente'),area:val('asignatura'),
     periodo_lectivo:val('periodo_lectivo'),unidad:val('unidad'),titulo_unidad:val('titulo_unidad'),paralelo:val('paralelo'),
     fecha_inicio:$('fecha_inicio').value,fecha_fin:$('fecha_fin').value,
     secuencia:getSeq(),metodologia:getMetod(),competencias:getComps(),inserciones:getIns(),
