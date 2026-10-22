@@ -2414,13 +2414,21 @@ function tablaHTML(d,plan){
   const h=(t,c)=>`<td class="h" colspan="${c}">${t}</td>`;
   const c=(t,n)=>`<td colspan="${n}">${t}</td>`;
   const marca=(lista,[clave,rot],n,tipo)=>{
-    const activo=lista.includes(clave);
     const logoMap=tipo==='ins'?LOGOS_INS:LOGOS_COMP;
     const compKeyMap={'comunicacional':'comunicacional','matemática':'matematica','digital':'digital','socioemocional':'socioemocional_comp'};
     const logoKey=tipo==='comp'?(compKeyMap[clave]||clave):clave;
     const logo=logoMap[logoKey]?`<img src="${logoMap[logoKey]}" alt="${rot}" style="width:32px;height:32px;object-fit:contain;display:block;margin:2px auto;">`:null;
-    if(activo&&logo) return `<td class="h" colspan="${n}" style="text-align:center;vertical-align:middle">${logo}<span style="font-size:9px;display:block;margin-top:2px">${rot}</span></td>`;
-    return `<td class="h" colspan="${n}">${rot}${activo?'<br><span class="x">X</span>':''}</td>`;
+    if(logo) return `<td class="h" colspan="${n}" style="text-align:center;vertical-align:middle">${logo}<span style="font-size:9px;display:block;margin-top:2px">${rot}</span></td>`;
+    return `<td class="h" colspan="${n}">${rot}</td>`;
+  };
+  // Convierte marcadores (CC),(CS),(ECEI),(ESV),(ESI),(EDS),(EF) en íconos pequeños inline al final del paso
+  const SIGLA_IMG={'CC':LOGOS_COMP['comunicacional'],'CM':LOGOS_COMP['matematica'],'CD':LOGOS_COMP['digital'],'CS':LOGOS_COMP['socioemocional_comp'],'ECEI':LOGOS_INS['cívica, ética e integridad'],'ESE':LOGOS_INS['educación socioemocional'],'ESI':LOGOS_INS['seguridad integral'],'ESV':LOGOS_INS['seguridad vial'],'EDS':LOGOS_INS['desarrollo sostenible'],'EF':LOGOS_INS['educación financiera']};
+  const escPaso=txt=>{
+    if(!txt)return '';
+    return esc(txt).replace(/\(([A-Z]{2,5})\)/g,(m,sig)=>{
+      const src=SIGLA_IMG[sig];
+      return src?` <img src="${src}" alt="${sig}" title="${sig}" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-left:2px;">`:m;
+    });
   };
   const etapas=d.secuencia==='ACC'?ETAPAS_ACC:ETAPAS_ERCA;
   const compMarca=Array.isArray(plan.competencias_plan)?plan.competencias_plan:d.competencias;
@@ -2432,7 +2440,7 @@ function tablaHTML(d,plan){
     const k=nombre.toLowerCase();
     const k2=k.normalize('NFD').replace(/[̀-ͯ]/g,'');
     const e=(plan.etapas&&(plan.etapas[k]||plan.etapas[k2]))||{};
-    const pasos=Array.isArray(e.pasos)&&e.pasos.length?`<ol>${e.pasos.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:`<p>${esc(e.actividad)}</p>`;
+    const pasos=Array.isArray(e.pasos)&&e.pasos.length?`<ol>${e.pasos.map(x=>`<li>${escPaso(x)}</li>`).join('')}</ol>`:`<p>${escPaso(e.actividad)}</p>`;
     const iniTxt=plan.inicio_texto||plan.situacion_aprendizaje;
     const sit=ix===0&&iniTxt?`<p class="sit-box"><b>${esc(plan.inicio_tipo||'Situación de aprendizaje')}:</b> ${esc(iniTxt).replace(/\n/g,'<br>')}</p>`:'';
     const etPreg=d.secuencia==='ACC'?0:1;
@@ -2627,22 +2635,41 @@ function tablaB_HTML(d,plan){
   html+='<tr>'+h('Destreza')+h('Indicador de evaluación')+h('Estrategia metodológica activa')+h('Recursos')+h('Evaluación')+'</tr>';
   const filas=Array.isArray(plan.sesiones)?plan.sesiones:[];
   if(filas.length){
+    const safeEsc=v=>typeof v==='object'&&v!==null?(v.texto||v.actividad||v.descripcion||v.nombre||JSON.stringify(v)):esc(v||'');
     filas.forEach(s=>{
       html+='<tr>'
         +cell(esc(s.destreza||d.destreza||''))
         +cell(esc(s.indicador||d.indicador||''))
-        +cell(Array.isArray(s.actividades)?s.actividades.map(a=>`<p>${esc(a)}</p>`).join(''):esc(s.actividades||s.estrategia||''))
-        +cell(Array.isArray(s.recursos)?s.recursos.map(r=>`<p>${esc(r)}</p>`).join(''):esc(s.recursos||''))
-        +cell(esc(s.evaluacion||s.cierre||''))
+        +cell(Array.isArray(s.actividades)?s.actividades.map(a=>`<p>${safeEsc(a)}</p>`).join(''):safeEsc(s.actividades||s.estrategia||''))
+        +cell(Array.isArray(s.recursos)?s.recursos.map(r=>`<p>${safeEsc(r)}</p>`).join(''):safeEsc(s.recursos||''))
+        +cell(safeEsc(s.evaluacion||s.cierre||''))
         +'</tr>';
     });
   }else{
+    // Extraer actividades de etapas ERCA/ACC si existen
+    const etapasKeys=['experiencia','reflexion','conceptualizacion','aplicacion','anticipacion','construccion','consolidacion'];
+    let actsB='';
+    if(plan.etapas&&typeof plan.etapas==='object'){
+      actsB=etapasKeys.filter(k=>plan.etapas[k]&&(plan.etapas[k].pasos||plan.etapas[k].actividad)).map(k=>{
+        const e=plan.etapas[k];
+        const nom=k.charAt(0).toUpperCase()+k.slice(1);
+        const ps=Array.isArray(e.pasos)&&e.pasos.length?`<ol>${e.pasos.map(x=>`<li>${esc(typeof x==='object'?(x.texto||x.actividad||JSON.stringify(x)):x)}</li>`).join('')}</ol>`:`<p>${esc(e.actividad||'')}</p>`;
+        return `<p><b>${nom.toUpperCase()}${e.nombre?': '+esc(e.nombre):''}</b>${e.tiempo?' ('+esc(e.tiempo)+')':''}</p>${ps}`;
+      }).join('');
+    }
+    if(!actsB){
+      const rawActs=plan.actividades_desarrollo;
+      actsB=Array.isArray(rawActs)?rawActs.map(a=>`<p>${esc(typeof a==='object'?(a.texto||a.actividad||a.descripcion||JSON.stringify(a)):a)}</p>`).join(''):esc(rawActs||'');
+    }
+    const rawRecs=plan.recursos;
+    const recsB=Array.isArray(rawRecs)?rawRecs.map(r=>`<p>${esc(typeof r==='object'?(r.nombre||(r.nombre&&r.detalle?r.nombre+': '+r.detalle:'')||JSON.stringify(r)):r)}</p>`).join(''):esc(rawRecs||'');
+    const evalB=typeof plan.evaluacion==='object'?(plan.evaluacion.tecnica||plan.evaluacion.instrumento?`Técnica: ${plan.evaluacion.tecnica||''}. Instrumento: ${plan.evaluacion.instrumento||''}.`:JSON.stringify(plan.evaluacion)):esc(plan.evaluacion||'');
     html+='<tr>'
       +cell(esc(d.destreza||''))
-      +cell(esc(d.indicador||plan.indicador||''))
-      +cell(Array.isArray(plan.actividades_desarrollo)?plan.actividades_desarrollo.map(a=>`<p>${esc(a)}</p>`).join(''):esc(plan.actividades_desarrollo||''))
-      +cell(Array.isArray(plan.recursos)?plan.recursos.map(r=>`<p>${esc(r)}</p>`).join(''):esc(plan.recursos||''))
-      +cell(esc(plan.evaluacion||''))
+      +cell(esc(d.indicador||plan.indicador||plan.indicador_desagregado||''))
+      +cell(actsB)
+      +cell(recsB)
+      +cell(evalB)
       +'</tr>';
   }
   html+='</table>';
