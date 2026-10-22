@@ -1707,33 +1707,7 @@ footer strong { color: #fff; }
   </div>
 </div>
 
-<!-- COMPETENCIAS -->
-<div class="card" id="s-comp">
-  <div class="card-hdr"><div class="card-icon ic-p">🎯</div><div><div class="card-title">Énfasis en competencias</div><div class="card-sub">Selecciona una o varias</div></div></div>
-  <div class="card-body">
-    <div class="chips" id="comp-grid">
-      <span class="chip" data-v="comunicacional">💬 Comunicacional</span>
-      <span class="chip" data-v="matemática">🔢 Matemática</span>
-      <span class="chip" data-v="digital">💻 Digital</span>
-      <span class="chip" data-v="socioemocional">❤️ Socioemocional</span>
-    </div>
-  </div>
-</div>
 
-<!-- INSERCIONES -->
-<div class="card" id="s-ins">
-  <div class="card-hdr"><div class="card-icon ic-b">🔗</div><div><div class="card-title">Inserciones curriculares</div><div class="card-sub">Selecciona una o varias</div></div></div>
-  <div class="card-body">
-    <div class="chips" id="ins-grid">
-      <span class="chip" data-v="cívica, ética e integridad">⚖️ Cívica, ética e integridad</span>
-      <span class="chip" data-v="educación socioemocional">🧠 Socioemocional</span>
-      <span class="chip" data-v="educación financiera">💰 Educación financiera</span>
-      <span class="chip" data-v="seguridad vial">🚦 Seguridad vial</span>
-      <span class="chip" data-v="desarrollo sostenible">🌱 Desarrollo sostenible</span>
-      <span class="chip" data-v="seguridad integral">🛡️ Seguridad integral</span>
-    </div>
-  </div>
-</div>
 
 <!-- DESTREZAS SECUNDARIAS -->
 <div class="card" id="s-sec" style="display:none">
@@ -2237,8 +2211,8 @@ $('inicio-grid').addEventListener('click',e=>{const b=e.target.closest('.mb');if
 function actualizarInicio(){const inv=getMetod()==='Aula invertida';$('inicio-grid').classList.toggle('bloq',inv);$('inicio-grid').style.opacity=inv?'.4':'1';$('inicio-grid').style.pointerEvents=inv?'none':'auto';$('inicio-nota').style.display=inv?'block':'none';}
 function getInicio(){if(getMetod()==='Aula invertida')return 'invertida';const a=document.querySelector('#inicio-grid .mb.on');return a?a.dataset.i:'';}
 function getMetod(){const a=document.querySelector('#metod-grid .mb.on');return a?a.dataset.m:'';}
-$('comp-grid').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;c.classList.toggle('on-p');});
-$('ins-grid').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;c.classList.toggle('on-b');});
+if($('comp-grid'))$('comp-grid').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;c.classList.toggle('on-p');});
+if($('ins-grid'))$('ins-grid').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;c.classList.toggle('on-b');});
 function getComps(){return[...document.querySelectorAll('#comp-grid .chip.on-p')].map(e=>e.dataset.v);}
 function getIns(){return[...document.querySelectorAll('#ins-grid .chip.on-b')].map(e=>e.dataset.v);}
 
@@ -2272,8 +2246,6 @@ function aplicarModo(){
   const m=enMapa(),oculto=$('res-wrap').classList.contains('show');
   $('mapa-box').classList.toggle('show',m);
   if(oculto)return;
-  $('s-comp').style.display=m?'none':'block';
-  $('s-ins').style.display=m?'none':'block';
   $('s-sec').style.display=m?'block':'none';
   $('destreza').readOnly=m;
   $('destreza').placeholder=m?'Elige la destreza en el buscador de arriba':'Escribe la destreza exactamente como aparece en el currículo MINEDUC...';
@@ -2288,7 +2260,7 @@ function filtrar(){
 function limpiarSeleccion(borrar){
   if(mapaSel||borrar&&$('destreza').readOnly){$('destreza').value='';$('indicador').value='';}
   mapaSel=null;$('ind-hint').textContent='';$('sel-ind').style.display='none';
-  $('mapa-info').innerHTML='Elige una destreza para ver sus competencias e inserciones curriculares.';
+  const mi=$('mapa-info');if(mi)mi.innerHTML='Elige una destreza para ver sus competencias e inserciones curriculares.';
   const preview=$('comp-ins-preview');if(preview)preview.style.display='none';
 }
 function elegirDestreza(){
@@ -2308,7 +2280,7 @@ function elegirDestreza(){
     $('ind-hint').textContent='Indicador del currículo priorizado. PLANIA sugerirá su desagregación según las actividades planificadas.';
   }
   const comps=[...e.k].map(c=>COMPK[c][1]);
-  $('mapa-info').innerHTML=`<div class="mc"><b>Competencias:</b> ${comps.length?esc(comps.join(', ')):'El currículo no marca una competencia específica en esta destreza.'}</div>`
+  const mi2=$('mapa-info');if(mi2)mi2.innerHTML=`<div class="mc"><b>Competencias:</b> ${comps.length?esc(comps.join(', ')):'El currículo no marca una competencia específica en esta destreza.'}</div>`
     +(e.n.length?e.n.map(x=>`<div class="mi"><b>${esc(TIPO[x[0]][1])}:</b> ${esc(x[1])}</div>`).join(''):'<div class="mi">El currículo no marca inserciones curriculares en esta destreza.</div>');
   // ── Bloque visual comp-ins-preview ──
   const compKeyInv={comunicacional:'c',matemática:'m','matemática':'m',digital:'d',socioemocional:'s'};
