@@ -2376,7 +2376,7 @@ async function generarEnFondo(envio){
     $('prog-msg').textContent=msgs[Math.min(msgs.length-1,Math.floor(seg/9))]+' ('+seg+' s)';
     let j;
     try{j=await cuentaApi({accion:'trabajo_ver',token:tk(),trabajo_id:id});}catch(e){if(e.status===401)return{status:401,data:{error:e.message}};continue;}
-    if(j&&j.pendiente===false){let data={};try{data=JSON.parse(j.body||'{}');}catch(e){data={error:'La respuesta llegó incompleta. Intenta de nuevo.'};}return{status:j.status,ok:j.status>=200&&j.status<300,data};}
+    if(j&&j.pendiente===false){let data={};try{data=JSON.parse(j.body||'{}');}catch(e){data={error:'La respuesta llegó incompleta. Intenta de nuevo.'};} console.log('[PLANIA] resp trabajo_ver status='+j.status,data.error||'ok');return{status:j.status,ok:j.status>=200&&j.status<300,data};}
   }
   throw new Error('La generación está tardando más de lo normal. Revisa en unos minutos la sección Mis planificaciones.');
 }
@@ -2561,7 +2561,7 @@ async function generar(){
     delete envio.docente;delete envio.paralelo;delete envio.fecha_inicio;delete envio.fecha_fin;
     const resp=await generarEnFondo(envio);
     const data=resp.data;
-    if(resp.status===401){setTk('');USR=null;pintarUsuario();throw new Error(data.error);}
+    if(resp.status===401){throw new Error(data.error||'Tu sesión expiró. Recarga la página e intenta de nuevo.');}
     if(resp.status===428){USR=data.usuario||USR;if(USR)USR.perfil_completo=false;pintarUsuario();throw new Error(data.error);}
     if(resp.status===402){USR=data.usuario||USR;pintarUsuario();abrirPago();throw new Error('Ya usaste tus planificaciones gratuitas. Suscríbete para seguir generando.');}
     if(!resp.ok||data.error) throw new Error(data.error||'Error del servidor');
