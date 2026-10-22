@@ -1606,15 +1606,18 @@ footer strong { color: #fff; }
         <label>Trimestre <span class="req">*</span></label>
         <select id="trimestre"><option>Primer</option><option>Segundo</option><option>Tercer</option></select>
       </div>
-      <div class="field">
-        <label>Área</label>
-        <input type="text" id="area" placeholder="Ej: Lengua y Literatura">
-      </div>
       <div class="field full mapa-box" id="mapa-box">
         <label>Busca la destreza en el currículo priorizado</label>
         <input type="text" id="buscar" placeholder="Escribe un tema, una palabra o el código. Ej: fracciones, cuento, M.3.1.38" autocomplete="off">
         <select id="sel-destreza"><option value="">Selecciona la destreza</option></select>
         <span class="hint" id="mapa-cuenta"></span>
+      </div>
+      <div class="field full" id="comp-ins-preview" style="display:none">
+        <div style="background:var(--fondo2,#f5f0fb);border:1px solid var(--morado-claro,#d4b8e8);border-radius:10px;padding:12px 14px">
+          <div style="font-size:11px;font-weight:600;color:var(--morado,#6E1290);margin-bottom:8px;letter-spacing:.03em">COMPETENCIAS E INSERCIONES DE ESTA DESTREZA</div>
+          <div id="comp-ins-logos" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px"></div>
+          <div style="font-size:10px;color:var(--tinta3,#888);font-style:italic">Las define el currículo priorizado con énfasis en competencias — se aplican de forma automática.</div>
+        </div>
       </div>
       <div class="field full">
         <label>Destreza con criterio de desempeño <span class="req">*</span></label>
@@ -2293,6 +2296,7 @@ function limpiarSeleccion(borrar){
   if(mapaSel||borrar&&$('destreza').readOnly){$('destreza').value='';$('indicador').value='';}
   mapaSel=null;$('ind-hint').textContent='';$('sel-ind').style.display='none';
   $('mapa-info').innerHTML='Elige una destreza para ver sus competencias e inserciones curriculares.';
+  const preview=$('comp-ins-preview');if(preview)preview.style.display='none';
 }
 function elegirDestreza(){
   const i=$('sel-destreza').value;
@@ -2313,6 +2317,35 @@ function elegirDestreza(){
   const comps=[...e.k].map(c=>COMPK[c][1]);
   $('mapa-info').innerHTML=`<div class="mc"><b>Competencias:</b> ${comps.length?esc(comps.join(', ')):'El currículo no marca una competencia específica en esta destreza.'}</div>`
     +(e.n.length?e.n.map(x=>`<div class="mi"><b>${esc(TIPO[x[0]][1])}:</b> ${esc(x[1])}</div>`).join(''):'<div class="mi">El currículo no marca inserciones curriculares en esta destreza.</div>');
+  // ── Bloque visual comp-ins-preview ──
+  const compKeyInv={comunicacional:'c',matemática:'m','matemática':'m',digital:'d',socioemocional:'s'};
+  const logoKeyMap={'comunicacional':'comunicacional','matemática':'matematica','digital':'digital','socioemocional':'socioemocional_comp'};
+  let logoHTML='';
+  // Competencias
+  [...e.k].forEach(k=>{
+    const nombre=COMPK[k]?COMPK[k][1]:k;
+    const imgKey=logoKeyMap[COMPK[k]?COMPK[k][0]:k]||k;
+    const src=LOGOS_COMP[imgKey];
+    logoHTML+=`<div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:48px">`
+      +(src?`<img src="${src}" alt="${nombre}" title="${nombre}" style="width:40px;height:40px;object-fit:contain">`:`<span style="font-size:9px;background:var(--morado,#6E1290);color:#fff;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;text-align:center;padding:2px">${esc(nombre.slice(0,3).toUpperCase())}</span>`)
+      +`<span style="font-size:9px;color:var(--morado,#6E1290);text-align:center;max-width:56px;line-height:1.2">${esc(nombre.replace('Competencias ',''))}</span></div>`;
+  });
+  // Separador si hay ambos
+  if(e.k.size&&e.n.length) logoHTML+=`<div style="width:1px;height:48px;background:var(--morado-claro,#d4b8e8);margin:0 4px"></div>`;
+  // Inserciones
+  e.n.forEach(([ins])=>{
+    const nombre=TIPO[ins]?TIPO[ins][1]:ins;
+    const insNombre=TIPO[ins]?TIPO[ins][0]:ins;
+    const src=LOGOS_INS[insNombre];
+    logoHTML+=`<div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:56px">`
+      +(src?`<img src="${src}" alt="${nombre}" title="${nombre}" style="width:48px;height:48px;object-fit:contain">`:`<span style="font-size:8px;background:#e9e4f2;color:var(--morado,#6E1290);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px">${esc(nombre.slice(0,4))}</span>`)
+      +`<span style="font-size:9px;color:var(--tinta2,#444);text-align:center;max-width:64px;line-height:1.2">${esc(nombre.replace('Educación ','').replace('Educación para la ',''))}</span></div>`;
+  });
+  const preview=$('comp-ins-preview');
+  if(preview){
+    $('comp-ins-logos').innerHTML=logoHTML||'<span style="font-size:11px;color:#999">Sin competencias ni inserciones registradas para esta destreza.</span>';
+    preview.style.display='block';
+  }
 }
 $('subnivel').addEventListener('change',alCambiarSubnivel);
 $('asignatura').addEventListener('change',alCambiarAsignatura);
