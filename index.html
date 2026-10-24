@@ -2619,57 +2619,140 @@ function nueva(){
 }
 
 function tablaB_HTML(d,plan){
-  const h=(t,span)=>`<td class="h"${span?` colspan="${span}"`:''}>${esc(t)}</td>`;
-  const cell=t=>`<td>${t||''}</td>`;
-  // Encabezado Tabla C (Formato Institucional)
-  let html='<table><tr>'+h('Institución',2)+h('Docente',2)+h('Área',2)+'</tr><tr>'
-    +cell(esc(d.institucion||''))+cell('')+cell(esc(d.docente||''))+cell('')+cell(esc(d.area||''))+cell('')+'</tr>'
-    +'<tr>'+h('Asignatura',2)+h('Grado',2)+h('Período lectivo',2)+'</tr><tr>'
-    +cell(esc(d.asignatura||''))+cell('')+cell(esc(d.grado||''))+cell('')+cell(esc(d.periodo_lectivo||''))+cell('')+'</tr>'
-    +'<tr>'+h('Unidad',2)+h('Título de la unidad',2)+h('Fecha',2)+'</tr><tr>'
-    +cell(esc(d.unidad||''))+cell('')+cell(esc(d.titulo_unidad||''))+cell('')+cell(esc((d.fecha_inicio||'')+(d.fecha_fin?' al '+d.fecha_fin:'')))+cell('')+'</tr>'
-    +'<tr>'+h('Destreza con criterio de desempeño',6)+'</tr><tr><td colspan="6">'+esc(d.destreza||'')+'</td></tr>';
-  // Cuerpo Tabla B (Formato Ministerial)
-  html+='<tr>'+h('Destreza')+h('Indicador de evaluación')+h('Estrategia metodológica activa')+h('Recursos')+h('Evaluación')+'</tr>';
-  const filas=Array.isArray(plan.sesiones)?plan.sesiones:[];
-  if(filas.length){
-    const safeEsc=v=>typeof v==='object'&&v!==null?(v.texto||v.actividad||v.descripcion||v.nombre||JSON.stringify(v)):esc(v||'');
-    filas.forEach(s=>{
+  const h=(t,span,extra)=>`<td class="h"${span?` colspan="${span}"`:''}${extra?' style="'+extra+'"':''}>${esc(t)}</td>`;
+  const cell=(t,span,extra)=>`<td${span?` colspan="${span}"`:''}${extra?' style="'+extra+'"':''}>${t||''}</td>`;
+  const safeEsc=v=>typeof v==='object'&&v!==null?(v.texto||v.actividad||v.descripcion||v.nombre||JSON.stringify(v)):esc(v||'');
+
+  // ── Semáforo DUA ─────────────────────────────────────────────────────────
+  // Principios: Representación (azul), Expresión/Acción (verde), Compromiso (naranja)
+  const DUA_COLORS={rep:'#4472c4',exp:'#70ad47',com:'#ed7d31'};
+  const DUA_LABELS={rep:'Representación',exp:'Expresión y acción',com:'Compromiso'};
+  const duaSemafor=(e)=>{
+    const rep=e&&e.representacion&&e.representacion.trim();
+    const exp=e&&(e.accion||e.expresion)&&(e.accion||e.expresion).trim();
+    const com=e&&e.implicacion&&e.implicacion.trim();
+    if(!rep&&!exp&&!com)return '';
+    const box=(color,lbl,active)=>`<span title="${lbl}" style="display:inline-block;width:11px;height:11px;margin:1px;border-radius:2px;background:${active?color:'#e0e0e0'};border:1px solid ${active?color:'#bbb'};vertical-align:middle;"></span>`;
+    const legend=`<span style="font-size:7pt;color:#555;margin-left:3px">DUA</span>`;
+    return `<div style="margin-top:4pt;display:flex;align-items:center;gap:1px">${box(DUA_COLORS.rep,DUA_LABELS.rep,!!rep)}${box(DUA_COLORS.exp,DUA_LABELS.exp,!!exp)}${box(DUA_COLORS.com,DUA_LABELS.com,!!com)}${legend}</div>`;
+  };
+
+  // ── escPasoB (igual que escPaso en tablaHTML pero accede a SIGLA_IMG) ──────
+  const SIGLA_MAP={'CC':LOGOS_COMP['comunicacional'],'CM':LOGOS_COMP['matematica'],'CD':LOGOS_COMP['digital'],'CS':LOGOS_COMP['socioemocional_comp'],'ECEI':LOGOS_INS['cívica, ética e integridad'],'ESE':LOGOS_INS['educación socioemocional'],'ESI':LOGOS_INS['seguridad integral'],'ESV':LOGOS_INS['seguridad vial'],'EDS':LOGOS_INS['desarrollo sostenible'],'EF':LOGOS_INS['educación financiera']};
+  const escPasoB=txt=>{
+    if(!txt)return '';
+    return esc(typeof txt==='object'?(txt.texto||txt.actividad||JSON.stringify(txt)):txt)
+      .replace(/\(([A-Z]{2,5})\)/g,(m,sig)=>{
+        const src=SIGLA_MAP[sig];
+        return src?` <img src="${src}" alt="${sig}" title="${sig}" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-left:2px;">`:m;
+      });
+  };
+
+  // ── Encabezado institucional ────────────────────────────────────────────
+  let html='<table>'
+    +'<tr>'+h('Institución',2)+h('Docente',2)+h('Área',2)+'</tr>'
+    +'<tr>'+cell(esc(d.institucion||''),2)+cell(esc(d.docente||''),2)+cell(esc(d.area||''),2)+'</tr>'
+    +'<tr>'+h('Asignatura',2)+h('Grado / Curso',2)+h('Período lectivo',2)+'</tr>'
+    +'<tr>'+cell(esc(d.asignatura||''),2)+cell(esc(d.grado||''),2)+cell(esc(d.periodo_lectivo||''),2)+'</tr>'
+    +'<tr>'+h('Unidad',1)+h('Título de la unidad',2)+h('Fecha de inicio',1)+h('Fecha de finalización',1)+h('Semanas',1)+'</tr>'
+    +'<tr>'+cell(esc(d.unidad||''))+cell(esc(d.titulo_unidad||''),2)+cell(esc(d.fecha_inicio||''))+cell(esc(d.fecha_fin||''))+cell(esc(d.semanas||''))+'</tr>'
+    +'<tr>'+h('Objetivo de la unidad',6)+'</tr>'
+    +'<tr>'+cell(esc(plan.objetivo_unidad||plan.objetivo||''),6)+'</tr>'
+    +'<tr>'+h('Destreza con criterio de desempeño',6)+'</tr>'
+    +'<tr>'+cell(esc(d.destreza||''),6)+'</tr>';
+
+  // ── Leyenda DUA ──────────────────────────────────────────────────────────
+  const duaLeyenda=`<td colspan="6" style="background:#f9f9f9;padding:4pt 5pt;font-size:8pt">`
+    +`<b>Diseño Universal para el Aprendizaje (DUA) — Semaforización de principios:</b>&nbsp;&nbsp;`
+    +`<span style="display:inline-flex;align-items:center;gap:3px;margin-right:8px"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${DUA_COLORS.rep};border:1px solid ${DUA_COLORS.rep}"></span> Representación</span>`
+    +`<span style="display:inline-flex;align-items:center;gap:3px;margin-right:8px"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${DUA_COLORS.exp};border:1px solid ${DUA_COLORS.exp}"></span> Expresión y acción</span>`
+    +`<span style="display:inline-flex;align-items:center;gap:3px"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${DUA_COLORS.com};border:1px solid ${DUA_COLORS.com}"></span> Compromiso</span>`
+    +`</td>`;
+  html+=`<tr>${duaLeyenda}</tr>`;
+
+  // ── Cabecera columnas ────────────────────────────────────────────────────
+  html+='<tr>'
+    +h('Conceptos esenciales / Destreza')
+    +h('Indicador de evaluación')
+    +h('Estrategia metodológica activa (DUA)')
+    +h('Recursos')
+    +h('Evaluación')
+    +h('DUA','',null)
+    +'</tr>';
+
+  // ── Filas por etapa ERCA/ACC ─────────────────────────────────────────────
+  const etapasKeys=d.secuencia==='ACC'
+    ?['anticipacion','construccion','consolidacion']
+    :['experiencia','reflexion','conceptualizacion','aplicacion'];
+  const etapasNombres={experiencia:'EXPERIENCIA',reflexion:'REFLEXIÓN',conceptualizacion:'CONCEPTUALIZACIÓN',aplicacion:'APLICACIÓN',anticipacion:'ANTICIPACIÓN',construccion:'CONSTRUCCIÓN',consolidacion:'CONSOLIDACIÓN'};
+
+  const etapas=plan.etapas&&typeof plan.etapas==='object'?plan.etapas:{};
+  const etapasPresentes=etapasKeys.filter(k=>etapas[k]&&(etapas[k].pasos||etapas[k].actividad));
+
+  if(etapasPresentes.length){
+    // Evaluación y recursos van en la última fila (rowspan o celda separada)
+    const rawRecs=plan.recursos;
+    const recsHTML=Array.isArray(rawRecs)?rawRecs.map(r=>`<p>${esc(typeof r==='object'?(r.nombre+(r.detalle?': '+r.detalle:'')):r)}</p>`).join(''):esc(rawRecs||'');
+    const ev=plan.evaluacion||{};
+    const evalHTML=typeof ev==='object'?(ev.tecnica||ev.instrumento?`<p><b>Técnica:</b> ${esc(ev.tecnica||'')}</p><p><b>Instrumento:</b> ${esc(ev.instrumento||'')}</p>`:esc(JSON.stringify(ev))):esc(ev);
+    const n=etapasPresentes.length;
+
+    etapasPresentes.forEach((k,ix)=>{
+      const e=etapas[k]||{};
+      const nom=etapasNombres[k]||k.toUpperCase();
+      const pasos=Array.isArray(e.pasos)&&e.pasos.length
+        ?`<ol style="margin:2pt 0 2pt 14pt;padding:0">${e.pasos.map(x=>`<li>${escPasoB(x)}</li>`).join('')}</ol>`
+        :`<p>${escPasoB(e.actividad)}</p>`;
+      const estratHTML=`<p><b>${nom}${e.nombre?': '+esc(e.nombre):''}</b>${e.tiempo?' ('+esc(e.tiempo)+')':''}</p>${pasos}`;
+      const semaforo=duaSemafor(e);
+
+      // Columnas recursos y evaluación con rowspan en la primera etapa
+      const recEvalCols=ix===0
+        ?`<td rowspan="${n}">${recsHTML}</td><td rowspan="${n}">${evalHTML}</td>`
+        :'';
+
       html+='<tr>'
-        +cell(esc(s.destreza||d.destreza||''))
-        +cell(esc(s.indicador||d.indicador||''))
-        +cell(Array.isArray(s.actividades)?s.actividades.map(a=>`<p>${safeEsc(a)}</p>`).join(''):safeEsc(s.actividades||s.estrategia||''))
-        +cell(Array.isArray(s.recursos)?s.recursos.map(r=>`<p>${safeEsc(r)}</p>`).join(''):safeEsc(s.recursos||''))
-        +cell(safeEsc(s.evaluacion||s.cierre||''))
+        +cell(ix===0?esc(d.destreza||''):'',1,ix===0?'vertical-align:top':'vertical-align:top;border-top:none')
+        +cell(ix===0?esc(d.indicador||plan.indicador||plan.indicador_desagregado||''):'',1,ix===0?'vertical-align:top':'vertical-align:top;border-top:none')
+        +`<td>${estratHTML}</td>`
+        +recEvalCols
+        +`<td style="text-align:center;vertical-align:middle;width:14px">${semaforo}</td>`
         +'</tr>';
     });
   }else{
-    // Extraer actividades de etapas ERCA/ACC si existen
-    const etapasKeys=['experiencia','reflexion','conceptualizacion','aplicacion','anticipacion','construccion','consolidacion'];
-    let actsB='';
-    if(plan.etapas&&typeof plan.etapas==='object'){
-      actsB=etapasKeys.filter(k=>plan.etapas[k]&&(plan.etapas[k].pasos||plan.etapas[k].actividad)).map(k=>{
-        const e=plan.etapas[k];
-        const nom=k.charAt(0).toUpperCase()+k.slice(1);
-        const ps=Array.isArray(e.pasos)&&e.pasos.length?`<ol>${e.pasos.map(x=>`<li>${esc(typeof x==='object'?(x.texto||x.actividad||JSON.stringify(x)):x)}</li>`).join('')}</ol>`:`<p>${esc(e.actividad||'')}</p>`;
-        return `<p><b>${nom.toUpperCase()}${e.nombre?': '+esc(e.nombre):''}</b>${e.tiempo?' ('+esc(e.tiempo)+')':''}</p>${ps}`;
-      }).join('');
-    }
-    if(!actsB){
-      const rawActs=plan.actividades_desarrollo;
-      actsB=Array.isArray(rawActs)?rawActs.map(a=>`<p>${esc(typeof a==='object'?(a.texto||a.actividad||a.descripcion||JSON.stringify(a)):a)}</p>`).join(''):esc(rawActs||'');
-    }
+    // Fallback: sin etapas estructuradas — fila única como antes
+    const rawActs=plan.actividades_desarrollo;
+    const actsB=Array.isArray(rawActs)?rawActs.map(a=>`<p>${escPasoB(a)}</p>`).join(''):escPasoB(rawActs||'');
     const rawRecs=plan.recursos;
-    const recsB=Array.isArray(rawRecs)?rawRecs.map(r=>`<p>${esc(typeof r==='object'?(r.nombre||(r.nombre&&r.detalle?r.nombre+': '+r.detalle:'')||JSON.stringify(r)):r)}</p>`).join(''):esc(rawRecs||'');
-    const evalB=typeof plan.evaluacion==='object'?(plan.evaluacion.tecnica||plan.evaluacion.instrumento?`Técnica: ${plan.evaluacion.tecnica||''}. Instrumento: ${plan.evaluacion.instrumento||''}.`:JSON.stringify(plan.evaluacion)):esc(plan.evaluacion||'');
+    const recsB=Array.isArray(rawRecs)?rawRecs.map(r=>`<p>${esc(typeof r==='object'?(r.nombre+(r.detalle?': '+r.detalle:'')):r)}</p>`).join(''):esc(rawRecs||'');
+    const ev=plan.evaluacion||{};
+    const evalB=typeof ev==='object'?(ev.tecnica||ev.instrumento?`Técnica: ${esc(ev.tecnica||'')}. Instrumento: ${esc(ev.instrumento||'')}.`:esc(JSON.stringify(ev))):esc(ev);
     html+='<tr>'
       +cell(esc(d.destreza||''))
       +cell(esc(d.indicador||plan.indicador||plan.indicador_desagregado||''))
       +cell(actsB)
       +cell(recsB)
       +cell(evalB)
+      +cell('')
       +'</tr>';
   }
+
+  // ── Tarea para casa ──────────────────────────────────────────────────────
+  if(plan.tarea_casa&&plan.tarea_casa.consigna){
+    html+='<tr>'+h('Tarea para casa',6)+'</tr>'
+      +'<tr>'+cell(esc(plan.tarea_casa.consigna)+(plan.tarea_casa.herramienta?' <i>Herramienta: '+esc(plan.tarea_casa.herramienta)+'</i>':''),6)+'</tr>';
+  }
+
+  // ── Ajustes razonables / ACI ──────────────────────────────────────────────
+  const aj=Array.isArray(plan.ajustes_razonables)?plan.ajustes_razonables:[];
+  if(aj.length){
+    html+='<tr>'+h('Adaptaciones curriculares (estrategias específicas)',6)+'</tr>'
+      +'<tr>'+h('Necesidad educativa especial',2)+h('Destreza adaptada',2)+h('Actividad / Ajuste',2)+'</tr>';
+    aj.forEach(a=>{
+      html+='<tr>'+cell(esc(a.motivo||a.necesidad||''),2)+cell(esc(a.destreza||''),2)+cell(esc(a.actividad||a.ajuste||''),2)+'</tr>';
+    });
+  }
+
   html+='</table>';
   return html;
 }
