@@ -2619,65 +2619,66 @@ function nueva(){
 }
 
 function tablaB_HTML(d,plan){
-  const h=(t,span,extra)=>`<td class="h"${span?` colspan="${span}"`:''}${extra?' style="'+extra+'"':''}>${esc(t)}</td>`;
-  const cell=(t,span,extra)=>`<td${span?` colspan="${span}"`:''}${extra?' style="'+extra+'"':''}>${t||''}</td>`;
-  const safeEsc=v=>typeof v==='object'&&v!==null?(v.texto||v.actividad||v.descripcion||v.nombre||JSON.stringify(v)):esc(v||'');
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  const h=(t,span,extra)=>`<td class="h"${span?` colspan="${span}"`:''}${extra?` style="${extra}"`:''}>${esc(t)}</td>`;
+  const cell=(t,span,extra)=>`<td${span?` colspan="${span}"`:''}${extra?` style="${extra}"`:''}>${t||''}</td>`;
 
-  // ── Semáforo DUA ─────────────────────────────────────────────────────────
-  // Principios: Representación (azul), Expresión/Acción (verde), Compromiso (naranja)
+  // ── Semáforo DUA (cuadritos de colores inline en la celda de actividades) ─
   const DUA_COLORS={rep:'#4472c4',exp:'#70ad47',com:'#ed7d31'};
   const DUA_LABELS={rep:'Representación',exp:'Expresión y acción',com:'Compromiso'};
   const duaSemafor=(e)=>{
-    const rep=e&&e.representacion&&e.representacion.trim();
-    const exp=e&&(e.accion||e.expresion)&&(e.accion||e.expresion).trim();
-    const com=e&&e.implicacion&&e.implicacion.trim();
+    const rep=e&&(e.representacion||'').trim();
+    const exp=e&&((e.accion||e.expresion)||'').trim();
+    const com=e&&(e.implicacion||'').trim();
     if(!rep&&!exp&&!com)return '';
-    const box=(color,lbl,active)=>`<span title="${lbl}" style="display:inline-block;width:11px;height:11px;margin:1px;border-radius:2px;background:${active?color:'#e0e0e0'};border:1px solid ${active?color:'#bbb'};vertical-align:middle;"></span>`;
-    const legend=`<span style="font-size:7pt;color:#555;margin-left:3px">DUA</span>`;
-    return `<div style="margin-top:4pt;display:flex;align-items:center;gap:1px">${box(DUA_COLORS.rep,DUA_LABELS.rep,!!rep)}${box(DUA_COLORS.exp,DUA_LABELS.exp,!!exp)}${box(DUA_COLORS.com,DUA_LABELS.com,!!com)}${legend}</div>`;
+    const box=(color,lbl,active)=>`<span title="${lbl}" style="display:inline-block;width:10px;height:10px;margin:1px;border-radius:2px;background:${active?color:'#e0e0e0'};border:1px solid ${active?color:'#bbb'};vertical-align:middle;"></span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:1px;margin-left:4px">${box(DUA_COLORS.rep,DUA_LABELS.rep,!!rep)}${box(DUA_COLORS.exp,DUA_LABELS.exp,!!exp)}${box(DUA_COLORS.com,DUA_LABELS.com,!!com)}</span>`;
   };
 
-  // ── escPasoB (igual que escPaso en tablaHTML pero accede a SIGLA_IMG) ──────
+  // ── escPasoB: convierte (CC),(ESV), etc. a imágenes 14px ─────────────────
   const SIGLA_MAP={'CC':LOGOS_COMP['comunicacional'],'CM':LOGOS_COMP['matematica'],'CD':LOGOS_COMP['digital'],'CS':LOGOS_COMP['socioemocional_comp'],'ECEI':LOGOS_INS['cívica, ética e integridad'],'ESE':LOGOS_INS['educación socioemocional'],'ESI':LOGOS_INS['seguridad integral'],'ESV':LOGOS_INS['seguridad vial'],'EDS':LOGOS_INS['desarrollo sostenible'],'EF':LOGOS_INS['educación financiera']};
   const escPasoB=txt=>{
     if(!txt)return '';
-    return esc(typeof txt==='object'?(txt.texto||txt.actividad||JSON.stringify(txt)):txt)
+    return esc(typeof txt==='object'?(txt.texto||txt.actividad||JSON.stringify(txt)):String(txt))
       .replace(/\(([A-Z]{2,5})\)/g,(m,sig)=>{
         const src=SIGLA_MAP[sig];
         return src?` <img src="${src}" alt="${sig}" title="${sig}" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;margin-left:2px;">`:m;
       });
   };
 
-  // ── Encabezado institucional ────────────────────────────────────────────
+  // ── Encabezado institucional (6 columnas) ─────────────────────────────────
   let html='<table>'
-    +'<tr>'+h('Institución',2)+h('Docente',2)+h('Área',2)+'</tr>'
-    +'<tr>'+cell(esc(d.institucion||''),2)+cell(esc(d.docente||''),2)+cell(esc(d.area||''),2)+'</tr>'
-    +'<tr>'+h('Asignatura',2)+h('Grado / Curso',2)+h('Período lectivo',2)+'</tr>'
-    +'<tr>'+cell(esc(d.asignatura||''),2)+cell(esc(d.grado||''),2)+cell(esc(d.periodo_lectivo||''),2)+'</tr>'
-    +'<tr>'+h('Unidad',1)+h('Título de la unidad',2)+h('Fecha de inicio',1)+h('Fecha de finalización',1)+h('Semanas',1)+'</tr>'
-    +'<tr>'+cell(esc(d.unidad||''))+cell(esc(d.titulo_unidad||''),2)+cell(esc(d.fecha_inicio||''))+cell(esc(d.fecha_fin||''))+cell(esc(d.semanas||''))+'</tr>'
-    +'<tr>'+h('Objetivo de la unidad',6)+'</tr>'
-    +'<tr>'+cell(esc(plan.objetivo_unidad||plan.objetivo||''),6)+'</tr>'
-    +'<tr>'+h('Destreza con criterio de desempeño',6)+'</tr>'
-    +'<tr>'+cell(esc(d.destreza||''),6)+'</tr>';
+    +'<tr>'+h('Institución',2)+h('Docente',2)+h('Área',1)+'</tr>'
+    +'<tr>'+cell(esc(d.institucion||''),2)+cell(esc(d.docente||''),2)+cell(esc(d.area||''),1)+'</tr>'
+    +'<tr>'+h('Asignatura',2)+h('Grado / Curso',2)+h('Período lectivo',1)+'</tr>'
+    +'<tr>'+cell(esc(d.asignatura||''),2)+cell(esc(d.grado||''),2)+cell(esc(d.periodo_lectivo||''),1)+'</tr>'
+    +'<tr>'+h('Unidad',1)+h('Título de la unidad',2)+h('Fecha de inicio',1)+h('Fecha de fin',1)+'</tr>'
+    +'<tr>'+cell(esc(d.unidad||''))+cell(esc(d.titulo_unidad||''),2)+cell(esc(d.fecha_inicio||''))+cell(esc(d.fecha_fin||''))+'</tr>'
+    +'<tr>'+h('Objetivo de la unidad',5)+'</tr>'
+    +'<tr>'+cell(esc(plan.objetivo_unidad||plan.objetivo||''),5)+'</tr>'
+    +'<tr>'+h('Destreza con criterio de desempeño',5)+'</tr>'
+    +'<tr>'+cell(esc(d.destreza||''),5)+'</tr>';
 
-  // ── Leyenda DUA ──────────────────────────────────────────────────────────
-  const duaLeyenda=`<td colspan="6" style="background:#f9f9f9;padding:4pt 5pt;font-size:8pt">`
-    +`<b>Diseño Universal para el Aprendizaje (DUA) — Semaforización de principios:</b>&nbsp;&nbsp;`
-    +`<span style="display:inline-flex;align-items:center;gap:3px;margin-right:8px"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${DUA_COLORS.rep};border:1px solid ${DUA_COLORS.rep}"></span> Representación</span>`
-    +`<span style="display:inline-flex;align-items:center;gap:3px;margin-right:8px"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${DUA_COLORS.exp};border:1px solid ${DUA_COLORS.exp}"></span> Expresión y acción</span>`
-    +`<span style="display:inline-flex;align-items:center;gap:3px"><span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${DUA_COLORS.com};border:1px solid ${DUA_COLORS.com}"></span> Compromiso</span>`
-    +`</td>`;
-  html+=`<tr>${duaLeyenda}</tr>`;
+  // ── Leyenda DUA ───────────────────────────────────────────────────────────
+  html+='<tr><td colspan="5" style="background:#f9f9f9;padding:4pt 5pt;font-size:8pt">'
+    +'<b>Diseño Universal para el Aprendizaje (DUA):</b>&nbsp;&nbsp;'
+    +`<span style="display:inline-flex;align-items:center;gap:3px;margin-right:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${DUA_COLORS.rep}"></span> Representación</span>`
+    +`<span style="display:inline-flex;align-items:center;gap:3px;margin-right:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${DUA_COLORS.exp}"></span> Expresión y acción</span>`
+    +`<span style="display:inline-flex;align-items:center;gap:3px"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${DUA_COLORS.com}"></span> Compromiso</span>`
+    +'</td></tr>';
 
-  // ── Cabecera columnas ────────────────────────────────────────────────────
+  // ── Cabecera de la tabla de planificación (5 columnas según modelo) ────────
+  // Col 1: Conceptos esenciales / Destreza (rowspan por etapa)
+  // Col 2: Destrezas / Indicador de logro (rowspan)
+  // Col 3: Actividades de Aprendizaje (con semáforo DUA inline)
+  // Col 4: Recursos (rowspan)
+  // Col 5: Evaluación → sub-col Indicador de logro evaluación + Actividades/Insumos (rowspan)
   html+='<tr>'
-    +h('Conceptos esenciales / Destreza')
-    +h('Indicador de evaluación')
-    +h('Estrategia metodológica activa (DUA)')
-    +h('Recursos')
-    +h('Evaluación')
-    +h('DUA','',null)
+    +h('Conceptos esenciales',1,'text-align:center;vertical-align:middle')
+    +h('Destrezas con criterio de desempeño / Indicador de logro',1,'text-align:center;vertical-align:middle')
+    +h('Estrategias y actividades de aprendizaje (Metodología DUA)',1,'text-align:center;vertical-align:middle')
+    +h('Recursos',1,'text-align:center;vertical-align:middle')
+    +h('Evaluación',1,'text-align:center;vertical-align:middle')
     +'</tr>';
 
   // ── Filas por etapa ERCA/ACC ─────────────────────────────────────────────
@@ -2689,68 +2690,82 @@ function tablaB_HTML(d,plan){
   const etapas=plan.etapas&&typeof plan.etapas==='object'?plan.etapas:{};
   const etapasPresentes=etapasKeys.filter(k=>etapas[k]&&(etapas[k].pasos||etapas[k].actividad));
 
-  if(etapasPresentes.length){
-    // Evaluación y recursos van en la última fila (rowspan o celda separada)
-    const rawRecs=plan.recursos;
-    const recsHTML=Array.isArray(rawRecs)?rawRecs.map(r=>`<p>${esc(typeof r==='object'?(r.nombre+(r.detalle?': '+r.detalle:'')):r)}</p>`).join(''):esc(rawRecs||'');
-    const ev=plan.evaluacion||{};
-    const evalHTML=typeof ev==='object'?(ev.tecnica||ev.instrumento?`<p><b>Técnica:</b> ${esc(ev.tecnica||'')}</p><p><b>Instrumento:</b> ${esc(ev.instrumento||'')}</p>`:esc(JSON.stringify(ev))):esc(ev);
-    const n=etapasPresentes.length;
+  // Recursos (col 4, rowspan completo)
+  const rawRecs=plan.recursos;
+  const recsHTML=Array.isArray(rawRecs)
+    ?rawRecs.map(r=>`<p style="margin:0 0 3pt 0">${esc(typeof r==='object'?(r.nombre+(r.detalle?': '+r.detalle:'')):String(r))}</p>`).join('')
+    :esc(rawRecs||'');
 
+  // Evaluación (col 5, rowspan completo): lee plan.tecnica y plan.instrumento al nivel raíz
+  const tecnica=plan.tecnica||'';
+  const instrumento=plan.instrumento||'';
+  const indicadorEval=plan.indicador_desagregado||d.indicador||plan.indicador||'';
+  const evalHTML=(tecnica||instrumento)
+    ?`${indicadorEval?`<p style="margin:0 0 3pt 0"><b>Indicador:</b> ${esc(indicadorEval)}</p>`:''}${tecnica?`<p style="margin:0 0 3pt 0"><b>Técnica:</b> ${esc(tecnica)}</p>`:''}${instrumento?`<p style="margin:0"><b>Instrumento:</b> ${esc(instrumento)}</p>`:''}`
+    :`${indicadorEval?`<p style="margin:0 0 3pt 0"><b>Indicador:</b> ${esc(indicadorEval)}</p>`:''}`;
+
+  if(etapasPresentes.length){
+    const n=etapasPresentes.length;
     etapasPresentes.forEach((k,ix)=>{
       const e=etapas[k]||{};
       const nom=etapasNombres[k]||k.toUpperCase();
+      // Actividades con nombre y tiempo de etapa en negrita + pasos numerados
       const pasos=Array.isArray(e.pasos)&&e.pasos.length
-        ?`<ol style="margin:2pt 0 2pt 14pt;padding:0">${e.pasos.map(x=>`<li>${escPasoB(x)}</li>`).join('')}</ol>`
-        :`<p>${escPasoB(e.actividad)}</p>`;
-      const estratHTML=`<p><b>${nom}${e.nombre?': '+esc(e.nombre):''}</b>${e.tiempo?' ('+esc(e.tiempo)+')':''}</p>${pasos}`;
+        ?`<ol style="margin:2pt 0 2pt 14pt;padding:0">${e.pasos.map(x=>`<li style="margin-bottom:2pt">${escPasoB(x)}</li>`).join('')}</ol>`
+        :`<p style="margin:0">${escPasoB(e.actividad||'')}</p>`;
       const semaforo=duaSemafor(e);
+      const actividadHTML=`<p style="margin:0 0 2pt 0"><b style="color:#1a5276">${nom}${e.nombre?': '+esc(e.nombre):''}</b>${e.tiempo?' <span style="font-size:8pt;color:#555">('+esc(e.tiempo)+')</span>':''}${semaforo}</p>${pasos}`;
 
-      // Columnas recursos y evaluación con rowspan en la primera etapa
-      const recEvalCols=ix===0
-        ?`<td rowspan="${n}">${recsHTML}</td><td rowspan="${n}">${evalHTML}</td>`
-        :'';
+      // Col 1 y 2 con rowspan solo en la primera etapa
+      const col1=ix===0?cell(esc(d.destreza||d.tema||plan.tema||''),1,'vertical-align:top'):'';
+      const col2=ix===0?cell(esc(d.indicador||plan.indicador_desagregado||plan.indicador||''),1,'vertical-align:top'):'';
+      // Col 4 y 5 con rowspan solo en la primera etapa
+      const col4=ix===0?`<td rowspan="${n}" style="vertical-align:top">${recsHTML}</td>`:'';
+      const col5=ix===0?`<td rowspan="${n}" style="vertical-align:top">${evalHTML}</td>`:'';
 
-      html+='<tr>'
-        +cell(ix===0?esc(d.destreza||''):'',1,ix===0?'vertical-align:top':'vertical-align:top;border-top:none')
-        +cell(ix===0?esc(d.indicador||plan.indicador||plan.indicador_desagregado||''):'',1,ix===0?'vertical-align:top':'vertical-align:top;border-top:none')
-        +`<td>${estratHTML}</td>`
-        +recEvalCols
-        +`<td style="text-align:center;vertical-align:middle;width:14px">${semaforo}</td>`
-        +'</tr>';
+      html+='<tr>'+col1+col2+`<td style="vertical-align:top">${actividadHTML}</td>`+col4+col5+'</tr>';
     });
   }else{
-    // Fallback: sin etapas estructuradas — fila única como antes
+    // Fallback: sin etapas — fila única
     const rawActs=plan.actividades_desarrollo;
-    const actsB=Array.isArray(rawActs)?rawActs.map(a=>`<p>${escPasoB(a)}</p>`).join(''):escPasoB(rawActs||'');
-    const rawRecs=plan.recursos;
-    const recsB=Array.isArray(rawRecs)?rawRecs.map(r=>`<p>${esc(typeof r==='object'?(r.nombre+(r.detalle?': '+r.detalle:'')):r)}</p>`).join(''):esc(rawRecs||'');
-    const ev=plan.evaluacion||{};
-    const evalB=typeof ev==='object'?(ev.tecnica||ev.instrumento?`Técnica: ${esc(ev.tecnica||'')}. Instrumento: ${esc(ev.instrumento||'')}.`:esc(JSON.stringify(ev))):esc(ev);
+    const actsB=Array.isArray(rawActs)?rawActs.map(a=>`<p style="margin:0 0 2pt 0">${escPasoB(a)}</p>`).join(''):escPasoB(rawActs||'');
     html+='<tr>'
       +cell(esc(d.destreza||''))
       +cell(esc(d.indicador||plan.indicador||plan.indicador_desagregado||''))
       +cell(actsB)
-      +cell(recsB)
-      +cell(evalB)
-      +cell('')
+      +cell(recsHTML)
+      +cell(evalHTML)
       +'</tr>';
   }
 
   // ── Tarea para casa ──────────────────────────────────────────────────────
   if(plan.tarea_casa&&plan.tarea_casa.consigna){
-    html+='<tr>'+h('Tarea para casa',6)+'</tr>'
-      +'<tr>'+cell(esc(plan.tarea_casa.consigna)+(plan.tarea_casa.herramienta?' <i>Herramienta: '+esc(plan.tarea_casa.herramienta)+'</i>':''),6)+'</tr>';
+    html+='<tr>'+h('Tarea para casa',5)+'</tr>'
+      +'<tr>'+cell(esc(plan.tarea_casa.consigna)+(plan.tarea_casa.herramienta?` <i>Herramienta: ${esc(plan.tarea_casa.herramienta)}</i>`:''),5)+'</tr>';
   }
 
   // ── Ajustes razonables / ACI ──────────────────────────────────────────────
   const aj=Array.isArray(plan.ajustes_razonables)?plan.ajustes_razonables:[];
   if(aj.length){
-    html+='<tr>'+h('Adaptaciones curriculares (estrategias específicas)',6)+'</tr>'
-      +'<tr>'+h('Necesidad educativa especial',2)+h('Destreza adaptada',2)+h('Actividad / Ajuste',2)+'</tr>';
+    html+='<tr>'+h('Adaptaciones curriculares (estrategias específicas)',5)+'</tr>'
+      +'<tr>'+h('Necesidad educativa especial')+h('Destreza adaptada',2)+h('Actividad / Ajuste',2)+'</tr>';
     aj.forEach(a=>{
-      html+='<tr>'+cell(esc(a.motivo||a.necesidad||''),2)+cell(esc(a.destreza||''),2)+cell(esc(a.actividad||a.ajuste||''),2)+'</tr>';
+      html+='<tr>'+cell(esc(a.motivo||a.necesidad||''))+cell(esc(a.destreza||''),2)+cell(esc(a.actividad||a.ajuste||''),2)+'</tr>';
     });
+  }
+
+  // ── Adaptación curricular (ACI) ───────────────────────────────────────────
+  const aci=plan.adaptacion_curricular;
+  if(aci&&(aci.destreza_adaptada||aci.orientaciones)){
+    html+='<tr>'+h('Adaptación curricular individualizada (ACI)',5)+'</tr>'
+      +'<tr>'+h('Motivo')+h('Destreza adaptada')+h('Indicador adaptado')+h('Orientaciones')+h('Evaluación adaptada')+'</tr>'
+      +'<tr>'
+        +cell(esc(aci.motivo||''))
+        +cell(esc(aci.destreza_adaptada||''))
+        +cell(esc(aci.indicador_adaptado||''))
+        +cell(esc(aci.orientaciones||''))
+        +cell(esc(aci.evaluacion||''))
+      +'</tr>';
   }
 
   html+='</table>';
