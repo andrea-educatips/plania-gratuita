@@ -2417,7 +2417,8 @@ function tablaHTML(d,plan){
     const logoMap=tipo==='ins'?LOGOS_INS:LOGOS_COMP;
     const compKeyMap={'comunicacional':'comunicacional','matemática':'matematica','digital':'digital','socioemocional':'socioemocional_comp'};
     const logoKey=tipo==='comp'?(compKeyMap[clave]||clave):clave;
-    const logo=logoMap[logoKey]?`<img src="${logoMap[logoKey]}" alt="${rot}" style="width:32px;height:32px;object-fit:contain;display:block;margin:2px auto;">`:null;
+    const sz=tipo==='ins'?'24px':'28px';
+    const logo=logoMap[logoKey]?`<img src="${logoMap[logoKey]}" alt="${rot}" style="width:${sz};height:${sz};object-fit:contain;display:block;margin:2px auto;">`:null;
     if(logo) return `<td class="h" colspan="${n}" style="text-align:center;vertical-align:middle">${logo}<span style="font-size:9px;display:block;margin-top:2px">${rot}</span></td>`;
     return `<td class="h" colspan="${n}">${rot}</td>`;
   };
